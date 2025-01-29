@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FeedbackEnum } from "@prisma/client";
+import { redirect } from "next/navigation";
 
 export function AudioPlayer({ tokenId }: { tokenId: number }) {
   const [stakeholders, setStakeholders] = useState<
@@ -63,6 +64,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
 
       try {
         const owner = await songNFT.ownerOf(tokenId);
+        setMetadata(await songNFT.getSongMetadata(tokenId));
         const stakeholders = await songNFT.getStakeholders(tokenId);
         setStakeholders(
           stakeholders.addresses.map((address: string, idx: number) => ({
@@ -71,33 +73,30 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
           }))
         );
         return owner.toLowerCase() === userAddress.toLowerCase();
-      } catch {
+      } catch (err) {
+        console.error(err);
         return false;
       }
     }
     hasMintedSong().then(async (v) => {
-      if (!v) return;
+      console.log(v);
+      if (!v) {
+        setCanStream(false);
+      }
       const response = await addSongListen(tokenId);
-      if (response !== null) {
-        const {
-          metaIpfsLink,
-          streamLeft,
-          picture,
-          feedbackType,
-          likes,
-          views,
-        } = response;
-        setViews(views);
-        setLikes(likes);
-        setCanStream(true);
-        setPicture(picture ?? "");
-        setFeedback(feedbackType);
-        fetchTrackFromIPFS(metaIpfsLink);
+      const { metaIpfsLink, streamLeft, picture, feedbackType, likes, views } =
+        response;
+      setViews(views);
+      setLikes(likes);
+      setCanStream(v && streamLeft > 0);
+      setPicture(picture ?? "");
+      setFeedback(feedbackType);
+      fetchTrackFromIPFS(metaIpfsLink);
+      if (streamLeft !== -1)
         toast({
           title: "Consumed a stream",
           description: `${streamLeft} streams left`,
         });
-      }
     });
   }, [tokenId]);
 
@@ -175,7 +174,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
 
     addSongRights(tokenId, Number(price) * 100);
     await tx.wait();
-    return tx;
+    redirect("/dashboard/songs");
   }
 
   const onLike = () => {
@@ -251,7 +250,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
                 <h2 className="text-xl font-bold mb-1 text-black dark:text-white">
                   {metadata?.title || "Song Title"}
                 </h2>
-                <p className="text-white/70">
+                <p className="text-white/70 max-w-24 truncate">
                   {metadata?.artist || "Artist Name"}
                 </p>
               </div>

@@ -26,7 +26,7 @@ export async function addSongListen(tokenId: number) {
     include: { _count: { select: { SongListen: true } }, SongFeedback: true },
   });
 
-  if (song.SongRights[0].streamsLeft) {
+  if (song.SongRights[0]?.streamsLeft) {
     await prisma.songRights.update({
       where: { id: song.SongRights[0].id },
       data: { streamsLeft: { decrement: 1 } },
@@ -39,16 +39,15 @@ export async function addSongListen(tokenId: number) {
         songTokenId: tokenId,
       },
     });
-    return {
-      metaIpfsLink: song.metaIpfs,
-      streamLeft: song.SongRights[0].streamsLeft - 1,
-      picture: song.artist.user.image,
-      feedbackType: song.SongFeedback.at(0)?.type ?? "Neutral",
-      views: songData._count.SongListen,
-      likes: songData.SongFeedback.filter((f) => f.type === "Like").length,
-    };
   }
-  return null;
+  return {
+    metaIpfsLink: song.metaIpfs,
+    streamLeft: (song.SongRights.at(0)?.streamsLeft ?? 0) - 1,
+    picture: song.artist.user.image,
+    feedbackType: song.SongFeedback.at(0)?.type ?? "Neutral",
+    views: songData._count.SongListen,
+    likes: songData.SongFeedback.filter((f) => f.type === "Like").length,
+  };
 }
 
 export async function addSongRights(tokenId: number, streams: number) {
@@ -57,12 +56,20 @@ export async function addSongRights(tokenId: number, streams: number) {
   });
   if (!session) redirect("/sign-in");
 
-  await prisma.songRights.create({
-    data: {
+  const existingRights = await prisma.songRights.findFirst({
+    where: { songTokenId: tokenId, userId: session.user.id },
+  });
+
+  await prisma.songRights.upsert({
+    create: {
       userId: session.user.id,
       songTokenId: tokenId,
       streamsLeft: streams,
     },
+    update: {
+      streamsLeft: { increment: streams },
+    },
+    where: { id: existingRights?.id },
   });
 }
 
