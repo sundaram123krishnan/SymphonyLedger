@@ -1,6 +1,14 @@
 "use client";
 
-import { Album, BarChart3, Home, MapPin, Mic, Music } from "lucide-react";
+import {
+  Album,
+  AudioLines,
+  BarChart3,
+  Home,
+  MapPin,
+  Mic,
+  Music,
+} from "lucide-react";
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
@@ -17,6 +25,7 @@ import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { ModeToggle } from "./mode-toggle";
 import { title } from "process";
+import { url } from "inspector";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession();
@@ -64,6 +73,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "HeatMaps",
         url: "/dashboard/heatmaps",
         icon: MapPin,
+      },
+      {
+        title: "Plagiarism Check",
+        url: "/dashboard/music-plagiarism",
+        icon: AudioLines,
       },
     ],
   };
