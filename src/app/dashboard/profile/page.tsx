@@ -14,10 +14,8 @@ import {
 import { FileUpload } from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useContract } from "@/hooks/use-contract";
-import { ethers } from "ethers";
-import { PlayCircle, Plus, Share2 } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FileUpload } from "@/components/ui/file-upload";
+import { Badge } from "@/components/ui/badge";
 
 const user = {
   name: "Jane Doe",
@@ -62,30 +60,19 @@ const songs = [
 export default function Profile() {
   const [songFile, setSongFile] = useState<File | null>(null);
   const [subtitleFile, setSubtitleFile] = useState<File | null>(null);
-  const contract = useContract();
-
-  async function createNewSong(songData) {
-
-
-    const tx = await contract!.createSong(
-      songData.title,
-      songData.artist,
-      songData.ipfsHash,
-      songData.metadataURI,
-      ethers.parseEther(songData.mintPrice),
-      songData.stakeholderAddresses,
-      songData.sharePercentages
-    );
-
-    await tx.wait();
-    return tx;
-  }
+  const [genre, setGenre] = useState("");
+  const [genres, setGenres] = useState([]);
 
   const handleSongFileUpload = (files: File[]) => {
     if (files.length > 0) {
       setSongFile(files[0]);
     }
   };
+
+  function addGenre(genre: string) {
+    setGenres([...genres, genre]);
+    setGenre("");
+  }
 
   const handleSubtitleFileUpload = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -145,7 +132,22 @@ export default function Profile() {
               )}
             </div>
           </div>
-        </form>
+          <div className="flex items-center gap-4">
+            <Input
+              id="genre"
+              type="text"
+              className="w-fit"
+              value={genre}
+              onChange={(e) => setGenre(e.target.value)}
+            />
+            <Button onClick={() => addGenre(genre)}>Add Genre</Button>
+          </div>
+          <div className="flex items-center gap-2">
+            {genres.map((genre, index) => (
+              <Badge key={index}>{genre}</Badge>
+            ))}
+          </div>
+        </div>
         <DialogFooter>
           <Button type="submit">Save Changes</Button>
         </DialogFooter>
