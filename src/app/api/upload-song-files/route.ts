@@ -1,5 +1,9 @@
 import { PinataSDK } from "pinata-web3";
 import { parseBlob } from "music-metadata";
+import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT,
@@ -7,6 +11,11 @@ const pinata = new PinataSDK({
 });
 
 export async function POST(request: Request) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) redirect("/sign-in");
+
   try {
     const formData = await request.formData();
     const title = formData.get("title") as string;
@@ -31,6 +40,19 @@ export async function POST(request: Request) {
     };
     const metadataResult = await pinata.upload.json(metadata);
     const metadataCID = metadataResult.IpfsHash;
+
+    const artist = await prisma.artist.findFirstOrThrow({
+      where: { userId: session?.user.id },
+    });
+    await prisma.song.create({
+      data: {
+        likes: 0,
+        dislikes: 0,
+        metaIpfs: metadataCID,
+        songIpfs: songFileCID,
+        artistMetamaskAddress: artist.metamaskAddress,
+      },
+    });
 
     return new Response(
       JSON.stringify({

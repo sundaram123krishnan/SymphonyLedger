@@ -1,14 +1,15 @@
 "use client";
-import "./globals.css";
-import { Music } from "lucide-react";
 import { ThemeProvider } from "@/components/theme-provider";
-import { cn } from "@/lib/utils";
-import { Inter } from "next/font/google";
-import NextTopLoader from "nextjs-toploader";
 import { Button } from "@/components/ui/button";
-import { useSession } from "@/lib/auth-client";
-import Link from "next/link";
 import { Toaster } from "@/components/ui/toaster";
+import { useSession } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import { Music } from "lucide-react";
+import { Inter } from "next/font/google";
+import Link from "next/link";
+import NextTopLoader from "nextjs-toploader";
+import "./globals.css";
+import { LinkWithMetamask } from "./link-with-metamask";
 import { usePathname } from "next/navigation";
 
 const inter = Inter({
@@ -78,6 +79,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <NextTopLoader color="#7f1d1d" zIndex={1000} />
+          <LinkWithMetamask />
           {!testPathname && <header className="border-b py-2 mx-auto max-w-5xl">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between h-16">

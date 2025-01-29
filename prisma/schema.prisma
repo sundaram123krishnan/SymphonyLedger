@@ -78,14 +78,11 @@ model Verification {
 }
 
 model Artist {
-  user              User    @relation(fields: [userId], references: [id])
-  metamaskAddress   String  @id
-  userId            String  @unique
-  artistName        String
-  artistDescription String
-  artistPhoto       String
-  songs             Song[]
-  Album             Album[]
+  user            User    @relation(fields: [userId], references: [id])
+  metamaskAddress String  @id
+  userId          String  @unique
+  songs           Song[]
+  Album           Album[]
 }
 
 model Song {
