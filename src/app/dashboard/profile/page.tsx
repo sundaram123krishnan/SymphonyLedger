@@ -11,11 +11,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FileUpload } from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Badge } from "@/components/ui/badge";
+import { Plus, PlayCircle, Share2 } from "lucide-react";
+import { useState, FormEvent } from "react";
 
 const user = {
   name: "Jane Doe",
@@ -147,7 +148,7 @@ export default function Profile() {
               <Badge key={index}>{genre}</Badge>
             ))}
           </div>
-        </div>
+        </form>
         <DialogFooter>
           <Button type="submit">Save Changes</Button>
         </DialogFooter>
