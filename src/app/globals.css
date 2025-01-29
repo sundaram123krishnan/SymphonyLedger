@@ -6,6 +6,30 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+@layer utilities {
+  ::selection {
+    color: #1a202c;
+    background-color: #00faff;
+  }
+
+  ::-moz-selection {
+    color: #1a202c;
+    background-color: #00faff;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-md bg-gray-400;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-2 rounded-md bg-gray-700;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

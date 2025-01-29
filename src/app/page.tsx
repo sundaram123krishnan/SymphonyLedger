@@ -1,3 +1,7 @@
-export default function Home() {
-  return <div>hello world</div>;
-}
+import Home from "@/components/home";
+
+const Root = () => {
+  return <Home />;
+};
+
+export default Root;
