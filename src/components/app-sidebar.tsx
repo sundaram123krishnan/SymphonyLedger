@@ -5,6 +5,7 @@ import {
   AudioLines,
   BarChart3,
   Home,
+  ListPlus,
   MapPin,
   Mic,
   Music,
@@ -63,6 +64,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Songs",
         url: "/dashboard/songs",
         icon: Music,
+      },
+      {
+        title: "Playlists",
+        url: "/dashboard/playlist",
+        icon: ListPlus,
       },
       {
         title: "Leaderboard",
