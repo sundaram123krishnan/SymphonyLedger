@@ -58,7 +58,7 @@ export default function StakeholderPage() {
             <CardTitle>Stakeholder List</CardTitle>
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="bg-">
+                <Button variant="outline" size="sm" className="bg-primary">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Stakeholder
                 </Button>
