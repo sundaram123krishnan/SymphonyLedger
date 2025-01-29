@@ -60,17 +60,20 @@ export async function addSongRights(tokenId: number, streams: number) {
     where: { songTokenId: tokenId, userId: session.user.id },
   });
 
-  await prisma.songRights.upsert({
-    create: {
-      userId: session.user.id,
-      songTokenId: tokenId,
-      streamsLeft: streams,
-    },
-    update: {
-      streamsLeft: { increment: streams },
-    },
-    where: { id: existingRights?.id },
-  });
+  if (existingRights) {
+    await prisma.songRights.update({
+      data: { streamsLeft: { increment: streams } },
+      where: { id: existingRights.id },
+    });
+  } else {
+    await prisma.songRights.create({
+      data: {
+        userId: session.user.id,
+        songTokenId: tokenId,
+        streamsLeft: streams,
+      },
+    });
+  }
 }
 
 export async function addSongFeedback(tokenId: number, feedback: FeedbackEnum) {

@@ -19,7 +19,7 @@ export function SongRow({ song }: { song: Song }) {
 
   useEffect(() => {
     async function getMetadata() {
-      const response = await fetch(song.metaIpfs);
+      const response = await fetch(`https://ipfs.io/ipfs/${song.metaIpfs}`);
       setMetadata(await response.json());
     }
     getMetadata();
@@ -41,7 +41,7 @@ export function SongRow({ song }: { song: Song }) {
           </Link>
           <div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              {metadata.title}
+              {metadata?.title}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {metadata?.genre} •{" "}
