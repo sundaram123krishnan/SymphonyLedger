@@ -5,7 +5,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { Inter } from "next/font/google";
-import { ModeToggle } from "@/components/mode-toggle";
+import NextTopLoader from 'nextjs-toploader';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,6 +36,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <NextTopLoader />
           <SidebarProvider>
             <AppSidebar />
             <main className="p-4 flex flex-col gap-4 w-full mx-auto">
