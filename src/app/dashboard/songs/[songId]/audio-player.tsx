@@ -8,7 +8,10 @@ import {
   ForwardIcon,
   PlayIcon,
   RewindIcon,
+  Eye,
   UploadIcon,
+  ThumbsUp,
+  ThumbsDown,
   PauseIcon,
 } from "lucide-react"; // Import icons from lucide-react
 import Image from "next/image"; // Import Next.js Image component
@@ -16,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { TypographyH2 } from "@/components/typography/H2";
 
 // Define types for the component props and state
-interface AudioPlayerProps {}
+interface AudioPlayerProps { }
 
 // Define the Track interface
 interface Track {
@@ -111,11 +114,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = () => {
 
   // JSX return statement rendering the Audio Player UI
   return (
-    <div className="flex flex-col text-white p-4">
+    <div className="flex flex-col text-black dark:text-white p-4">
       <div className="max-w-md w-full space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center pb-5 justify-between">
           <TypographyH2>Audio Player</TypographyH2>
-          <label className="flex items-center cursor-pointer bg-white/20 hover:bg-white/30 transition-colors rounded-full px-4 py-2">
+
+          <Button>
             <UploadIcon className="w-5 h-5 mr-2" />
             <span>Upload</span>
             <Input
@@ -125,7 +129,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = () => {
               className="hidden"
               onChange={handleUpload}
             />
-          </label>
+          </Button>
         </div>
         <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardContent className="flex flex-col items-center justify-center gap-6 p-8">
@@ -139,11 +143,11 @@ const AudioPlayer: React.FC<AudioPlayerProps> = () => {
               />
             </div>
             <div className="text-center">
-              <h2 className="text-2xl font-bold mb-1">
-                {tracks[currentTrackIndex]?.title || "Audio Title"}
+              <h2 className="text-2xl font-bold mb-1 text-black dark:text-white">
+                {tracks[currentTrackIndex]?.title || "Song Title"}
               </h2>
               <p className="text-white/70">
-                {tracks[currentTrackIndex]?.artist || "Person Name"}
+                {tracks[currentTrackIndex]?.artist || "Artist Name"}
               </p>
             </div>
             <div className="w-full space-y-2">
@@ -153,35 +157,47 @@ const AudioPlayer: React.FC<AudioPlayerProps> = () => {
                 <span>{formatTime(duration)}</span>
               </div>
             </div>
-            <div className="flex items-center gap-6">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handlePrevTrack}
-                className="hover:bg-white/20 transition-colors"
-              >
-                <RewindIcon className="w-8 h-8" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handlePlayPause}
-                className="hover:bg-white/20 transition-colors"
-              >
-                {isPlaying ? (
-                  <PauseIcon className="w-12 h-12" />
-                ) : (
-                  <PlayIcon className="w-12 h-12" />
-                )}
-              </Button>
+            <div className="flex items-center justify-between gap-6 w-full">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleNextTrack}
-                className="hover:bg-white/20 transition-colors"
+                className="bg-white/20 rounded-full px-10"
               >
-                <ForwardIcon className="w-8 h-8" />
+                <div className="flex justify-between items-center gap-2 text-black dark:text-white"><Eye className="w-8 h-8" />11K</div>
               </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handlePlayPause}
+                className="bg-white/20 transition-colors rounded-full"
+              >
+                {isPlaying ? (
+                  <PauseIcon className="w-12 h-12 text-black dark:text-white" />
+                ) : (
+                  <PlayIcon className="w-12 h-12 text-black dark:text-white" />
+                )}
+              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleNextTrack}
+                  className="bg-white/20 rounded-full px-10"
+                >
+                  <div className="flex justify-between items-center gap-2 text-black dark:text-white"><ThumbsUp className="w-8 h-8" />11K</div>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleNextTrack}
+                  className="bg-white/20 rounded-full px-7"
+                >
+                  <ThumbsDown className="w-8 h-8 text-black dark:text-white" />
+                </Button>
+              </div>
             </div>
             <audio
               ref={audioRef}

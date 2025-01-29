@@ -20,6 +20,7 @@ import { Plus, PlayCircle, Share2 } from "lucide-react";
 import { useState, FormEvent } from "react";
 
 export default function Profile() {
+  const [title, setTitle] = useState()
   const {
     data: session,
   } = useSession()
