@@ -64,7 +64,6 @@ export default function Profile() {
   ];
 
   const [songFile, setSongFile] = useState<File | null>(null);
-  const [subtitleFile, setSubtitleFile] = useState<File | null>(null);
   const [genre, setGenre] = useState("");
   const [genres, setGenres] = useState<string[]>([]);
 
@@ -79,15 +78,7 @@ export default function Profile() {
     setGenre("");
   }
 
-  const handleSubtitleFileUpload = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setSubtitleFile(event.target.files[0]);
-    }
-  };
-
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
   }
@@ -104,13 +95,19 @@ export default function Profile() {
         <form className="grid gap-4 py-4" onSubmit={handleSubmit}>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="song-name" className="text-right">
-              Song Name
+              Song title
             </Label>
-            <Input id="song-name" required className="col-span-3" />
+            <Input
+              id="song-name"
+              required
+              className="col-span-3"
+              value={title}
+              onChange={(e) => setTitle(e.currentTarget.value)}
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="song-file" className="text-right">
-              Song File
+              Song file
             </Label>
             <div className="col-span-3">
               <FileUpload onChange={handleSongFileUpload} />
@@ -119,29 +116,11 @@ export default function Profile() {
               )}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="subtitle-file" className="text-right">
-              Subtitle File
-            </Label>
-            <div className="col-span-3">
-              <Input
-                id="subtitle-file"
-                type="file"
-                onChange={handleSubtitleFileUpload}
-                accept=".srt,.vtt"
-              />
-              {subtitleFile && (
-                <p className="mt-2 text-sm text-gray-500">
-                  {subtitleFile.name}
-                </p>
-              )}
-            </div>
-          </div>
           <div className="flex items-center gap-4">
             <Input
               id="genre"
               type="text"
-              className="w-fit"
+              className="w-full"
               value={genre}
               onChange={(e) => setGenre(e.target.value)}
             />
@@ -154,7 +133,7 @@ export default function Profile() {
           </div>
         </form>
         <DialogFooter>
-          <Button type="submit">Save Changes</Button>
+          <Button type="submit">Add</Button>
         </DialogFooter>
       </DialogContent>
 

@@ -26,7 +26,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default function StakeholderPage() {
-  const [stakeholders, setStakeholders] = useState([]);
+  const [stakeholders, setStakeholders] = useState<
+    {
+      address: string;
+      percent: number;
+    }[]
+  >([]);
   const [address, setAddress] = useState("");
   const [percent, setPercent] = useState(0.0);
 
@@ -49,7 +54,7 @@ export default function StakeholderPage() {
             <CardTitle>Stakeholder Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <StakeholderChart data={stakeholders} />
+            <StakeholderChart />
           </CardContent>
         </Card>
 

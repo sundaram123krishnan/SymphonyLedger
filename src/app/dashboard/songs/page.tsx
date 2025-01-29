@@ -1,5 +1,14 @@
-const Songs = () => {
-    return <h1>ahahah</h1>
-}
+import { TypographyH2 } from "@/components/typography/H2";
+import { SongsTable } from "./SongsTable";
+import { Suspense } from "react";
 
-export default Songs
+export default function SongsPage() {
+  return (
+    <>
+      <TypographyH2>Songs</TypographyH2>
+      <Suspense>
+        <SongsTable />
+      </Suspense>
+    </>
+  );
+}

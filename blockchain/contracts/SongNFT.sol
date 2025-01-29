@@ -21,7 +21,8 @@ contract SongNFT is ERC721URIStorage, Ownable {
     struct SongMetadata {
         string title;
         string artist;
-        string ipfsHash; // IPFS hash of the MP3 file
+        string ipfsHash; // IPFS hash of the MP3,
+        string metadataURI;
         uint256 mintPrice;
         bool exists;
     }
@@ -69,6 +70,7 @@ contract SongNFT is ERC721URIStorage, Ownable {
             title,
             artist,
             ipfsHash,
+            metadataURI,
             mintPrice,
             true // mark as existing
         );
@@ -118,12 +120,13 @@ contract SongNFT is ERC721URIStorage, Ownable {
             string memory title,
             string memory artist,
             string memory ipfsHash,
+            string memory metadataURI,
             uint256 mintPrice
         )
     {
         require(songExists(tokenId), "Song does not exist");
         SongMetadata memory song = songs[tokenId];
-        return (song.title, song.artist, song.ipfsHash, song.mintPrice);
+        return (song.title, song.artist, song.ipfsHash, song.metadataURI, song.mintPrice);
     }
 
     function getStakeholders(
