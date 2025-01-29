@@ -15,15 +15,18 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String       @id
   name          String
   email         String
   emailVerified Boolean
   image         String?
   createdAt     DateTime
   updatedAt     DateTime
+  artistProfile Artist?
   sessions      Session[]
   accounts      Account[]
+  Playlist      Playlist[]
+  SongListen    SongListen[]
 
   @@unique([email])
   @@map("user")
@@ -72,4 +75,57 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Artist {
+  user              User    @relation(fields: [userId], references: [id])
+  metamaskAddress   String  @id
+  userId            String  @unique
+  artistName        String
+  artistDescription String
+  artistPhoto       String
+  songs             Song[]
+  Album             Album[]
+}
+
+model Song {
+  artist                Artist       @relation(fields: [artistMetamaskAddress], references: [metamaskAddress])
+  artistMetamaskAddress String
+  likes                 Int
+  dislikes              Int
+  songIpfs              String       @id
+  metaIpfs              String
+  playlist              Playlist?    @relation(fields: [playlistPlaylistId], references: [playlistId])
+  playlistPlaylistId    Int?
+  Album                 Album?       @relation(fields: [albumAlbumId], references: [albumId])
+  albumAlbumId          Int?
+  SongListen            SongListen[]
+}
+
+model Album {
+  artist                Artist @relation(fields: [artistMetamaskAddress], references: [metamaskAddress])
+  artistMetamaskAddress String
+  songs                 Song[]
+  name                  String
+  albumId               Int    @id @default(autoincrement())
+}
+
+model Playlist {
+  creator     User   @relation(fields: [userId], references: [id])
+  songs       Song[]
+  userId      String
+  playlistId  Int    @id @default(autoincrement())
+  name        String
+  description String
+}
+
+model SongListen {
+  song         Song     @relation(fields: [songIpfs], references: [songIpfs])
+  songIpfs     String
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  listenNumber Int      @id @default(autoincrement())
+  listenedAt   DateTime @default(now())
+  lat          Float
+  lng          Float
 }
