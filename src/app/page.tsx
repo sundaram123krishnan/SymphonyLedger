@@ -1,5 +1,9 @@
 const Root = () => {
-    return (<h1>ahs</h1>)
+    return (
+        <main className="bg-black h-screen">
+
+        </main>
+    )
 }
 
 export default Root
