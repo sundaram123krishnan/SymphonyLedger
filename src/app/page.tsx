@@ -1,7 +1,5 @@
-import Home from "@/components/home";
-
 const Root = () => {
-  return <Home />;
-};
+    return (<h1>ahs</h1>)
+}
 
-export default Root;
+export default Root

@@ -51,32 +51,32 @@ const data = {
   navMain: [
     {
       title: "Home",
-      url: "/",
+      url: "/dashboard",
       icon: Home
     },
     {
       title: "Stakeholders",
-      url: "/add-stakeholder",
+      url: "/dashboard/add-stakeholder",
       icon: Users
     },
     {
       title: "Albums",
-      url: "/albums/create",
+      url: "/dashboard/albums/create",
       icon: Album
     },
     {
       title: "Artists",
-      url: "/artists",
+      url: "/dashboard/artists",
       icon: Mic
     },
     {
       title: "Songs",
-      url: "/songs",
+      url: "/dashboard/songs",
       icon: Music
     },
     {
       title: "Leaderboard",
-      url: "/leaderboard",
+      url: "/dashboard/leaderboard",
       icon: BarChart3
     },
   ],

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { Inter } from "next/font/google";
@@ -37,12 +35,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <NextTopLoader />
-          <SidebarProvider>
-            <AppSidebar />
-            <main className="p-4 flex flex-col gap-4 w-full mx-auto">
-              {children}
-            </main>
-          </SidebarProvider>
+          {children}
         </ThemeProvider>
       </body>
     </html>
