@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { Inter } from "next/font/google";
 
@@ -28,19 +27,12 @@ export default function RootLayout({
                     "min-h-screen min-w-full overflow-y-auto overflow-x-hidden"
                 )}
             >
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                >
-                    <SidebarProvider>
-                        <AppSidebar />
-                        <main className="p-4 flex flex-col gap-4 w-full mx-auto">
-                            {children}
-                        </main>
-                    </SidebarProvider>
-                </ThemeProvider>
+                <SidebarProvider>
+                    <AppSidebar />
+                    <main className="p-4 flex flex-col gap-4 w-full mx-auto">
+                        {children}
+                    </main>
+                </SidebarProvider>
             </body>
         </html>
     );

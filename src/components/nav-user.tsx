@@ -9,6 +9,7 @@ import {
   Sparkles,
   User,
 } from "lucide-react"
+import { signOut } from "@/lib/auth-client";
 
 import {
   Avatar,
@@ -31,6 +32,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
+import { useRouter } from "next/navigation";
 
 export function NavUser({
   user,
@@ -42,6 +44,9 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+
+
 
   return (
     <SidebarMenu>
@@ -77,7 +82,15 @@ export function NavUser({
                 </DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={async () => {
+              await signOut({
+                fetchOptions: {
+                  onSuccess: () => {
+                    router.push("/");
+                  },
+                },
+              })
+            }}>
               <LogOut />
               Log out
             </DropdownMenuItem>

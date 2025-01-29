@@ -33,56 +33,60 @@ import {
 } from "@/components/ui/sidebar";
 import { ModeToggle } from "./mode-toggle";
 import Link from "next/link";
-
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "SymphonyLedger",
-      logo: Music,
-      plan: "Blockchain",
-    },
-  ],
-  navMain: [
-    {
-      title: "Home",
-      url: "/dashboard",
-      icon: Home
-    },
-    {
-      title: "Stakeholders",
-      url: "/dashboard/add-stakeholder",
-      icon: Users
-    },
-    {
-      title: "Albums",
-      url: "/dashboard/albums/create",
-      icon: Album
-    },
-    {
-      title: "Artists",
-      url: "/dashboard/artists",
-      icon: Mic
-    },
-    {
-      title: "Songs",
-      url: "/dashboard/songs",
-      icon: Music
-    },
-    {
-      title: "Leaderboard",
-      url: "/dashboard/leaderboard",
-      icon: BarChart3
-    },
-  ],
-};
+import { useSession } from "@/lib/auth-client";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const {
+    data: session,
+  } = useSession()
+
+  const data = {
+    user: {
+      name: session?.user.name,
+      email: session?.user.email,
+      avatar: session?.user?.image,
+    },
+    teams: [
+      {
+        name: "SymphonyLedger",
+        logo: Music,
+        plan: "Blockchain",
+      },
+    ],
+    navMain: [
+      {
+        title: "Home",
+        url: "/dashboard",
+        icon: Home
+      },
+      {
+        title: "Stakeholders",
+        url: "/dashboard/add-stakeholder",
+        icon: Users
+      },
+      {
+        title: "Albums",
+        url: "/dashboard/albums/create",
+        icon: Album
+      },
+      {
+        title: "Artists",
+        url: "/dashboard/artists",
+        icon: Mic
+      },
+      {
+        title: "Songs",
+        url: "/dashboard/songs",
+        icon: Music
+      },
+      {
+        title: "Leaderboard",
+        url: "/dashboard/leaderboard",
+        icon: BarChart3
+      },
+    ],
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <div className="flex items-center justify-between">

@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useSession } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileUpload } from "@/components/ui/file-upload";
@@ -18,51 +19,54 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, PlayCircle, Share2 } from "lucide-react";
 import { useState, FormEvent } from "react";
 
-const user = {
-  name: "Jane Doe",
-  username: "janedoe",
-  avatarUrl: "/placeholder.svg?height=100&width=100",
-  songsCount: 24,
-  followersCount: 1234,
-};
-
-const songs = [
-  {
-    id: 1,
-    title: "Midnight Serenade",
-    genre: "Jazz",
-    plays: 12500,
-    duration: "3:45",
-  },
-  {
-    id: 2,
-    title: "Electric Dreams",
-    genre: "Synthwave",
-    plays: 8700,
-    duration: "4:20",
-  },
-  {
-    id: 3,
-    title: "Acoustic Sunrise",
-    genre: "Folk",
-    plays: 5600,
-    duration: "3:10",
-  },
-  {
-    id: 4,
-    title: "Urban Rhythm",
-    genre: "Hip Hop",
-    plays: 15000,
-    duration: "3:55",
-  },
-  { id: 5, title: "Neon Lights", genre: "Pop", plays: 20100, duration: "3:30" },
-];
-
 export default function Profile() {
+  const {
+    data: session,
+  } = useSession()
+
+  const user = {
+    name: session?.user.name || "",
+    avatarUrl: session?.user?.image || "",
+    songsCount: 24,
+    followersCount: 1234,
+  };
+
+  const songs = [
+    {
+      id: 1,
+      title: "Midnight Serenade",
+      genre: "Jazz",
+      plays: 12500,
+      duration: "3:45",
+    },
+    {
+      id: 2,
+      title: "Electric Dreams",
+      genre: "Synthwave",
+      plays: 8700,
+      duration: "4:20",
+    },
+    {
+      id: 3,
+      title: "Acoustic Sunrise",
+      genre: "Folk",
+      plays: 5600,
+      duration: "3:10",
+    },
+    {
+      id: 4,
+      title: "Urban Rhythm",
+      genre: "Hip Hop",
+      plays: 15000,
+      duration: "3:55",
+    },
+    { id: 5, title: "Neon Lights", genre: "Pop", plays: 20100, duration: "3:30" },
+  ];
+
   const [songFile, setSongFile] = useState<File | null>(null);
   const [subtitleFile, setSubtitleFile] = useState<File | null>(null);
   const [genre, setGenre] = useState("");
-  const [genres, setGenres] = useState([]);
+  const [genres, setGenres] = useState<string[]>([]);
 
   const handleSongFileUpload = (files: File[]) => {
     if (files.length > 0) {
@@ -85,7 +89,7 @@ export default function Profile() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    
+
   }
 
   return (
@@ -166,9 +170,6 @@ export default function Profile() {
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                   {user.name}
                 </h1>
-                <p className="text-gray-600 dark:text-gray-300">
-                  @{user.username}
-                </p>
                 <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                   <span className="mr-4">{user.songsCount} songs</span>
                   <span>{user.followersCount.toLocaleString()} followers</span>
