@@ -41,20 +41,6 @@ export default function Profile() {
         console.log(files);
     };
 
-    const [darkMode, setDarkMode] = useState(false)
-
-    useEffect(() => {
-        if (darkMode) {
-            document.documentElement.classList.add("dark")
-        } else {
-            document.documentElement.classList.remove("dark")
-        }
-    }, [darkMode])
-
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode)
-    }
-
     return (
         <Dialog>
             <DialogContent className="sm:max-w-[425px]">
