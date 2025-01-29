@@ -107,6 +107,7 @@ model Album {
   artistMetamaskAddress String
   songs                 Song[]
   name                  String
+  image                 String
   albumId               Int    @id @default(autoincrement())
 }
 

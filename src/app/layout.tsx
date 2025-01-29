@@ -25,6 +25,7 @@ export default function RootLayout({
   const pathname = usePathname()
   const { isPending, data: session } = useSession();
 
+
   const testPathname = () => {
     return /^\/dashboard(\/.*)?$/.test(pathname)
   }
@@ -80,7 +81,7 @@ export default function RootLayout({
         >
           <NextTopLoader color="#7f1d1d" zIndex={1000} />
           <LinkWithMetamask />
-          {!testPathname && <header className="border-b py-2 mx-auto max-w-5xl">
+          {!testPathname() && <header className="border-b py-2 mx-auto max-w-5xl">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between h-16">
                 <div className="flex items-center">
@@ -106,7 +107,7 @@ export default function RootLayout({
             </div>
           </header>}
           {children}
-          {!testPathname && <footer className="w-full bg-white dark:bg-black p-8 mt-16 border-t border-slate-200 mx-auto max-w-5xl">
+          {!testPathname() && <footer className="w-full bg-white dark:bg-black p-8 mt-16 border-t border-slate-200 mx-auto max-w-5xl">
             <div className="flex flex-row flex-wrap items-center justify-center gap-y-6 gap-x-12 bg-white dark:bg-black text-center md:justify-between">
               <div className="flex gap-4">
                 <Music /> SymphonyLedger

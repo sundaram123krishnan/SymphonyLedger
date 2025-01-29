@@ -51,7 +51,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         title: "Albums",
-        url: "/dashboard/albums/create",
+        url: "/dashboard/albums",
         icon: Album,
       },
       {
