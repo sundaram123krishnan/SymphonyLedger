@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import Meyda from "meyda";
 import { TypographyH2 } from "@/components/typography/H2";
@@ -11,6 +12,19 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 export default function AudioAnalyzer() {
   const audioRef1 = useRef(null);
@@ -18,11 +32,14 @@ export default function AudioAnalyzer() {
   const [rms1, setRms1] = useState(0);
   const [rms2, setRms2] = useState(0);
   const [similarity, setSimilarity] = useState(0);
+  const [rmsData1, setRmsData1] = useState<{ time: number; rms: number }[]>([]);
+  const [rmsData2, setRmsData2] = useState<{ time: number; rms: number }[]>([]);
 
   useEffect(() => {
     if (!audioRef1.current || !audioRef2.current) return;
 
-    const audioContext = new (window.AudioContext || window.AudioContext)();
+    const audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
     const source1 = audioContext.createMediaElementSource(audioRef1.current);
     const source2 = audioContext.createMediaElementSource(audioRef2.current);
     source1.connect(audioContext.destination);
@@ -33,12 +50,21 @@ export default function AudioAnalyzer() {
       return;
     }
 
+    const startTime = Date.now();
+
     const analyzer1 = Meyda.createMeydaAnalyzer({
       audioContext,
       source: source1,
       bufferSize: 512,
       featureExtractors: ["rms"],
-      callback: (features) => setRms1(features.rms),
+      callback: (features) => {
+        const newRms = features.rms;
+        setRms1(newRms);
+        setRmsData1((prevData) => [
+          ...prevData.slice(-100),
+          { time: (Date.now() - startTime) / 1000, rms: newRms },
+        ]);
+      },
     });
 
     const analyzer2 = Meyda.createMeydaAnalyzer({
@@ -46,7 +72,14 @@ export default function AudioAnalyzer() {
       source: source2,
       bufferSize: 512,
       featureExtractors: ["rms"],
-      callback: (features) => setRms2(features.rms),
+      callback: (features) => {
+        const newRms = features.rms;
+        setRms2(newRms);
+        setRmsData2((prevData) => [
+          ...prevData.slice(-100),
+          { time: (Date.now() - startTime) / 1000, rms: newRms },
+        ]);
+      },
     });
 
     analyzer1.start();
@@ -101,6 +134,34 @@ export default function AudioAnalyzer() {
                 RMS Level 1: {rms1.toFixed(3)}
               </p>
             </div>
+            <ChartContainer
+              config={{
+                rms: {
+                  label: "RMS",
+                  color: "hsl(var(--chart-1))",
+                },
+              }}
+              className="h-[200px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={rmsData1}>
+                  <XAxis
+                    dataKey="time"
+                    type="number"
+                    domain={["dataMin", "dataMax"]}
+                    tickFormatter={(value) => value.toFixed(1)}
+                  />
+                  <YAxis domain={[0, 1]} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line
+                    type="monotone"
+                    dataKey="rms"
+                    stroke="var(--color-rms)"
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
           </div>
 
           <div className="space-y-4">
@@ -128,6 +189,34 @@ export default function AudioAnalyzer() {
                 RMS Level 2: {rms2.toFixed(3)}
               </p>
             </div>
+            <ChartContainer
+              config={{
+                rms: {
+                  label: "RMS",
+                  color: "hsl(var(--chart-2))",
+                },
+              }}
+              className="h-[200px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={rmsData2}>
+                  <XAxis
+                    dataKey="time"
+                    type="number"
+                    domain={["dataMin", "dataMax"]}
+                    tickFormatter={(value) => value.toFixed(1)}
+                  />
+                  <YAxis domain={[0, 1]} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line
+                    type="monotone"
+                    dataKey="rms"
+                    stroke="var(--color-rms)"
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </CardContent>
         <CardFooter>
