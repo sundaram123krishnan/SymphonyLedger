@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, Plus, Share2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,9 +11,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { FileUpload } from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileUpload } from "@/components/ui/file-upload";
+import { useContract } from "@/hooks/use-contract";
+import { ethers } from "ethers";
+import { PlayCircle, Plus, Share2 } from "lucide-react";
+import { FormEvent, useState } from "react";
 
 const user = {
   name: "Jane Doe",
@@ -60,6 +62,24 @@ const songs = [
 export default function Profile() {
   const [songFile, setSongFile] = useState<File | null>(null);
   const [subtitleFile, setSubtitleFile] = useState<File | null>(null);
+  const contract = useContract();
+
+  async function createNewSong(songData) {
+
+
+    const tx = await contract!.createSong(
+      songData.title,
+      songData.artist,
+      songData.ipfsHash,
+      songData.metadataURI,
+      ethers.parseEther(songData.mintPrice),
+      songData.stakeholderAddresses,
+      songData.sharePercentages
+    );
+
+    await tx.wait();
+    return tx;
+  }
 
   const handleSongFileUpload = (files: File[]) => {
     if (files.length > 0) {
@@ -75,14 +95,11 @@ export default function Profile() {
     }
   };
 
-  const handleSubmit = () => {
-    // Handle the submission of the song and subtitle files
-    console.log("Song file:", songFile);
-    console.log("Subtitle file:", subtitleFile);
-    // Reset the state
-    setSongFile(null);
-    setSubtitleFile(null);
-  };
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    
+  }
+
   return (
     <Dialog>
       <DialogContent className="sm:max-w-[425px]">
@@ -92,19 +109,19 @@ export default function Profile() {
             Upload your new song here. Click save to continue.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <form className="grid gap-4 py-4" onSubmit={handleSubmit}>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="song-name" className="text-right">
               Song Name
             </Label>
-            <Input id="song-name" className="col-span-3" />
+            <Input id="song-name" required className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="song-file" className="text-right">
               Song File
             </Label>
             <div className="col-span-3">
-              <FileUpload onChange={handleSongFileUpload} maxFiles={1} />
+              <FileUpload onChange={handleSongFileUpload} />
               {songFile && (
                 <p className="mt-2 text-sm text-gray-500">{songFile.name}</p>
               )}
@@ -128,7 +145,7 @@ export default function Profile() {
               )}
             </div>
           </div>
-        </div>
+        </form>
         <DialogFooter>
           <Button type="submit">Save Changes</Button>
         </DialogFooter>
