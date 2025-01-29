@@ -11,6 +11,10 @@ export async function linkWithMetamask(userAddress: string) {
   });
   if (!session) redirect("/sign-in");
 
+  if (await prisma.artist.findUnique({ where: { userId: session.user.id } })) {
+    return false;
+  }
+
   await prisma.artist.create({
     data: { userId: session?.user.id, metamaskAddress: userAddress },
   });

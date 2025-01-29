@@ -29,8 +29,22 @@ export async function addSongListen(tokenId: number) {
         songTokenId: tokenId,
       },
     });
-    return true;
+    return song.metaIpfs;
   }
+  return null;
+}
 
-  return false;
+export async function addSongRights(tokenId: number, streams: number) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) redirect("/sign-in");
+
+  await prisma.songRights.create({
+    data: {
+      userId: session.user.id,
+      songTokenId: tokenId,
+      streamsLeft: streams,
+    },
+  });
 }

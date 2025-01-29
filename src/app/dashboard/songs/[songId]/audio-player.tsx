@@ -11,23 +11,16 @@ import { parseEther } from "ethers/src.ts/utils";
 import { Eye, PauseIcon, PlayIcon, ThumbsDown, ThumbsUp } from "lucide-react"; // Import icons from lucide-react
 import Image from "next/image"; // Import Next.js Image component
 import { useEffect, useRef, useState } from "react"; // Import React hooks
-import { addSongListen } from "./actions";
-
-// Define the Track interface
-interface Track {
-  title: string;
-  artist: string;
-  src: string;
-}
+import { addSongListen, addSongRights } from "./actions";
 
 export function AudioPlayer({ tokenId }: { tokenId: number }) {
   const [canStream, setCanStream] = useState(false);
-  const [tracks, setTracks] = useState<Track[]>([]); // State to manage the list of tracks
-  const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(0); // State to manage the current track index
   const [isPlaying, setIsPlaying] = useState<boolean>(false); // State to manage the play/pause status
   const [progress, setProgress] = useState<number>(0); // State to manage the progress of the current track
   const [currentTime, setCurrentTime] = useState<number>(0); // State to manage the current time of the track
   const [duration, setDuration] = useState<number>(0); // State to manage the duration of the track
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [metadata, setMetadata] = useState<any | undefined>();
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref to manage the audio element
 
   useEffect(() => {
@@ -50,14 +43,29 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
         return false;
       }
     }
-    hasMintedSong().then((v) => {
+    hasMintedSong().then(async (v) => {
       if (!v) return;
-      const canStream = addSongListen(tokenId);
-      if (true) {
+      const metaIpfsLink = await addSongListen(tokenId);
+      if (metaIpfsLink) {
         setCanStream(true);
+        fetchTrackFromIPFS(metaIpfsLink);
       }
     });
   }, [tokenId]);
+
+  async function fetchTrackFromIPFS(ipfsFileLink: string) {
+    const response = await fetch(`https://ipfs.io/ipfs/${ipfsFileLink}`);
+    const metadata = await response.json();
+    setMetadata(metadata);
+
+    if (audioRef.current) {
+      const response = await fetch(`https://ipfs.io/ipfs/${metadata.songFile}`);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      audioRef.current.src = url;
+      audioRef.current.load();
+    }
+  }
 
   // Function to handle play/pause toggle
   const handlePlayPause = () => {
@@ -68,18 +76,6 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
       audioRef.current?.play();
       setIsPlaying(true);
     }
-  };
-
-  // Function to handle next track
-  const handleNextTrack = () => {
-    setCurrentTrackIndex((prevIndex) => (prevIndex + 1) % tracks.length);
-  };
-
-  // Function to handle previous track
-  const handlePrevTrack = () => {
-    setCurrentTrackIndex((prevIndex) =>
-      prevIndex === 0 ? tracks.length - 1 : prevIndex - 1
-    );
   };
 
   // Function to handle time update of the track
@@ -120,24 +116,10 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
       value: parseEther(price),
     });
 
+    addSongRights(tokenId, Number(price) * 100);
     await tx.wait();
     return tx;
   }
-
-  // useEffect to handle track change
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = tracks[currentTrackIndex]?.src || "";
-      audioRef.current.load();
-      audioRef.current.currentTime = 0;
-      setCurrentTime(0); // Reset the current time for the new track
-      setProgress(0); // Reset the progress for the new track
-      if (isPlaying) {
-        audioRef.current.play();
-      }
-    }
-  }, [currentTrackIndex, tracks, isPlaying]);
 
   const onLike = () => {};
 
@@ -169,7 +151,6 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={handleNextTrack}
                   className="bg-white/20 rounded-full px-10"
                 >
                   <div className="flex justify-between items-center gap-2 text-black dark:text-white">
@@ -181,7 +162,6 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={handleNextTrack}
                   className="bg-white/20 rounded-full px-10"
                 >
                   <div className="flex justify-between items-center gap-2 text-black dark:text-white">
@@ -193,10 +173,10 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
 
               <div className="text-center">
                 <h2 className="text-xl font-bold mb-1 text-black dark:text-white">
-                  {tracks[currentTrackIndex]?.title || "Song Title"}
+                  {metadata?.title || "Song Title"}
                 </h2>
                 <p className="text-white/70">
-                  {tracks[currentTrackIndex]?.artist || "Artist Name"}
+                  {metadata?.artist || "Artist Name"}
                 </p>
               </div>
             </CardContent>
@@ -215,7 +195,6 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
     );
   }
 
-  // JSX return statement rendering the Audio Player UI
   return (
     <div className="flex flex-col text-black dark:text-white p-4">
       <div className="max-w-md w-full space-y-4">
@@ -235,11 +214,9 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
             </div>
             <div className="text-center">
               <h2 className="text-2xl font-bold mb-1 text-black dark:text-white">
-                {tracks[currentTrackIndex]?.title || "Song Title"}
+                {metadata?.title}
               </h2>
-              <p className="text-white/70">
-                {tracks[currentTrackIndex]?.artist || "Artist Name"}
-              </p>
+              <p className="text-white/70">{metadata?.artist}</p>
             </div>
             <div className="w-full space-y-2">
               <Progress value={progress} className="h-2 bg-white/20" />
@@ -252,7 +229,6 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleNextTrack}
                 className="bg-white/20 rounded-full px-10"
               >
                 <div className="flex justify-between items-center gap-2 text-black dark:text-white">
@@ -277,7 +253,6 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={handleNextTrack}
                   className="bg-white/20 rounded-full px-10"
                 >
                   <div
@@ -301,10 +276,9 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
             </div>
             <audio
               ref={audioRef}
-              src={tracks[currentTrackIndex]?.src}
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
-            />
+            ></audio>
           </CardContent>
         </Card>
       </div>
