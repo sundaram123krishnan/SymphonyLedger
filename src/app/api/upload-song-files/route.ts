@@ -22,6 +22,7 @@ export async function POST(request: Request) {
     const artists = formData.get("artists") as string;
     const file = formData.get("file") as File;
     const genre = formData.get("genre") as string;
+    const tokenId = Number(formData.get("tokenId"));
 
     if (!file || !title || !artists) {
       return new Response("Missing required fields", { status: 400 });
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
         metaIpfs: metadataCID,
         songIpfs: songFileCID,
         artistMetamaskAddress: artist.metamaskAddress,
+        tokenId,
       },
     });
 

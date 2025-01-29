@@ -4,20 +4,14 @@ import SongNFT from "@/../blockchain/artifacts/contracts/SongNFT.sol/SongNFT.jso
 import { TypographyH2 } from "@/components/typography/H2";
 import { Button } from "@/components/ui/button"; // Import custom Button component
 import { Card, CardContent } from "@/components/ui/card"; // Import custom Card components
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress"; // Import custom Progress component
 import { toast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
-import {
-  Eye,
-  PauseIcon,
-  PlayIcon,
-  ThumbsDown,
-  ThumbsUp,
-  UploadIcon,
-} from "lucide-react"; // Import icons from lucide-react
+import { parseEther } from "ethers/src.ts/utils";
+import { Eye, PauseIcon, PlayIcon, ThumbsDown, ThumbsUp } from "lucide-react"; // Import icons from lucide-react
 import Image from "next/image"; // Import Next.js Image component
-import React, { useEffect, useRef, useState } from "react"; // Import React hooks
+import { useEffect, useRef, useState } from "react"; // Import React hooks
+import { addSongListen } from "./actions";
 
 // Define the Track interface
 interface Track {
@@ -58,25 +52,12 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
     }
     hasMintedSong().then((v) => {
       if (!v) return;
-      // TODO: check remaining streams on prisma and if yes, decrement and setCanStream(true);
+      const canStream = addSongListen(tokenId);
       if (true) {
         setCanStream(true);
       }
     });
   }, [tokenId]);
-
-  // Function to handle file upload
-  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const newTracks: Track[] = Array.from(files).map((file) => ({
-        title: file.name,
-        artist: "Unknown Artist",
-        src: URL.createObjectURL(file),
-      }));
-      setTracks((prevTracks) => [...prevTracks, ...newTracks]);
-    }
-  };
 
   // Function to handle play/pause toggle
   const handlePlayPause = () => {
@@ -125,6 +106,24 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+  async function mintSong(price: string) {
+    if (!window.ethereum) return;
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await window.ethereum.request!({ method: "eth_requestAccounts" });
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(
+      process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!,
+      SongNFT.abi,
+      signer
+    );
+    const tx = await contract!.mintSong(tokenId, {
+      value: parseEther(price),
+    });
+
+    await tx.wait();
+    return tx;
+  }
+
   // useEffect to handle track change
   useEffect(() => {
     if (audioRef.current) {
@@ -140,13 +139,9 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
     }
   }, [currentTrackIndex, tracks, isPlaying]);
 
-  const onLike = () => {
+  const onLike = () => {};
 
-  }
-
-  const onDislike = () => {
-
-  }
+  const onDislike = () => {};
 
   if (!canStream) {
     toast({ title: "You don't have rights to play this song." });
@@ -207,18 +202,17 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
             </CardContent>
           </Card>
 
-          <div className="flex flex-col gap-2 max-w-sm">
-            <Button variant="secondary">
+          <div className="flex flex-col gap-2 max-w-sm justify-center">
+            <Button variant="secondary" onClick={() => mintSong("0.1")}>
               Purchase 10 streams
             </Button>
-
-            <Button>
+            <Button onClick={() => mintSong("0.8")}>
               Purchase 100 streams
             </Button>
           </div>
         </div>
       </>
-    )
+    );
   }
 
   // JSX return statement rendering the Audio Player UI
@@ -286,7 +280,10 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
                   onClick={handleNextTrack}
                   className="bg-white/20 rounded-full px-10"
                 >
-                  <div className="flex justify-between items-center gap-2 text-black dark:text-white" onClick={onLike}>
+                  <div
+                    className="flex justify-between items-center gap-2 text-black dark:text-white"
+                    onClick={onLike}
+                  >
                     <ThumbsUp className="w-8 h-8" />
                     11K
                   </div>

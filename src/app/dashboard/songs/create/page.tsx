@@ -62,9 +62,17 @@ export default function StakeholderPage() {
     const signer = provider.getSigner();
     const address = await signer.getAddress();
 
+    const contract = new ethers.Contract(
+      process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!,
+      SongNFT.abi,
+      signer
+    );
+    const nextTokenId = await contract.getNextTokenId();
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("artists", address);
+    formData.append("tokenId", nextTokenId);
     if (genre) {
       formData.append("genre", genre);
     }
@@ -78,11 +86,6 @@ export default function StakeholderPage() {
     });
     const { metadataCID, songCID } = await response.json();
 
-    const contract = new ethers.Contract(
-      process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!,
-      SongNFT.abi,
-      signer
-    );
     const remainingStake =
       100 - stakeholders.reduce((stake, { percent }) => stake + percent, 0);
     if (remainingStake > 0) {
@@ -171,10 +174,16 @@ export default function StakeholderPage() {
         </form>
         <Card className="col-span-1">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-black dark:text-white">Stakeholder List</CardTitle>
+            <CardTitle className="text-black dark:text-white">
+              Stakeholder List
+            </CardTitle>
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="bg-primary text-black dark:text-white">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-primary text-black dark:text-white"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Stakeholder
                 </Button>
@@ -219,7 +228,12 @@ export default function StakeholderPage() {
                   </div>
                 </div>
                 <DialogClose asChild>
-                  <Button onClick={addStakeholder} className="text-black dark:text-white">Add Stakeholder</Button>
+                  <Button
+                    onClick={addStakeholder}
+                    className="text-black dark:text-white"
+                  >
+                    Add Stakeholder
+                  </Button>
                 </DialogClose>
               </DialogContent>
             </Dialog>

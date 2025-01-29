@@ -27,6 +27,7 @@ model User {
   accounts      Account[]
   Playlist      Playlist[]
   SongListen    SongListen[]
+  SongRights    SongRights[]
 
   @@unique([email])
   @@map("user")
@@ -90,13 +91,15 @@ model Song {
   artistMetamaskAddress String
   likes                 Int
   dislikes              Int
-  songIpfs              String       @id
+  songIpfs              String
+  tokenId               Int          @id
   metaIpfs              String
   playlist              Playlist?    @relation(fields: [playlistPlaylistId], references: [playlistId])
   playlistPlaylistId    Int?
   Album                 Album?       @relation(fields: [albumAlbumId], references: [albumId])
   albumAlbumId          Int?
   SongListen            SongListen[]
+  SongRights            SongRights[]
 }
 
 model Album {
@@ -116,9 +119,18 @@ model Playlist {
   description String
 }
 
+model SongRights {
+  user        User   @relation(fields: [userId], references: [id])
+  userId      String
+  song        Song   @relation(fields: [songTokenId], references: [tokenId])
+  songTokenId Int
+  streamsLeft Int
+  id          Int    @id @default(autoincrement())
+}
+
 model SongListen {
-  song         Song     @relation(fields: [songIpfs], references: [songIpfs])
-  songIpfs     String
+  song         Song     @relation(fields: [songTokenId], references: [tokenId])
+  songTokenId  Int
   user         User     @relation(fields: [userId], references: [id])
   userId       String
   listenNumber Int      @id @default(autoincrement())
