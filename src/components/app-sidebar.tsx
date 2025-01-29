@@ -79,7 +79,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarHeader>
         </Link>
 
-        <div className="mr-4"><ModeToggle /></div>
+        <div className="mr-4">
+          <ModeToggle />
+        </div>
       </div>
       <SidebarContent>
         <NavMain items={data.navMain} />
