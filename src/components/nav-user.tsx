@@ -70,7 +70,7 @@ export function NavUser({
             sideOffset={4}
           >
             <DropdownMenuGroup>
-              <Link href="/profile">
+              <Link href="/dashboard/profile">
                 <DropdownMenuItem>
                   <User />
                   Profile

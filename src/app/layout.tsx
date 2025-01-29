@@ -25,7 +25,7 @@ export default function RootLayout({
       <body
         className={cn(
           inter.className,
-          "min-h-screen min-w-full overflow-y-auto overflow-x-hidden"
+          "min-h-screen min-w-full overflow-y-auto overflow-x-hidden bg-black"
         )}
       >
         <ThemeProvider
