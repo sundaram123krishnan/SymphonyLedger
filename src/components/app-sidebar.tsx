@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Album,
-  BarChart3,
-  Home,
-  Mic,
-  Music
-} from "lucide-react";
+import { Album, BarChart3, Home, MapPin, Mic, Music } from "lucide-react";
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
@@ -22,11 +16,10 @@ import {
 import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { ModeToggle } from "./mode-toggle";
+import { title } from "process";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const {
-    data: session,
-  } = useSession()
+  const { data: session } = useSession();
 
   const data = {
     user: {
@@ -45,27 +38,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         title: "Home",
         url: "/dashboard",
-        icon: Home
+        icon: Home,
       },
       {
         title: "Albums",
         url: "/dashboard/albums/create",
-        icon: Album
+        icon: Album,
       },
       {
         title: "Artists",
         url: "/dashboard/artists",
-        icon: Mic
+        icon: Mic,
       },
       {
         title: "Songs",
         url: "/dashboard/songs",
-        icon: Music
+        icon: Music,
       },
       {
         title: "Leaderboard",
         url: "/dashboard/leaderboard",
-        icon: BarChart3
+        icon: BarChart3,
+      },
+      {
+        title: "HeatMaps",
+        url: "/dashboard/heatmaps",
+        icon: MapPin,
       },
     ],
   };
@@ -79,7 +77,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarHeader>
         </Link>
 
-        <div className="mr-4"><ModeToggle /></div>
+        <div className="mr-4">
+          <ModeToggle />
+        </div>
       </div>
       <SidebarContent>
         <NavMain items={data.navMain} />
