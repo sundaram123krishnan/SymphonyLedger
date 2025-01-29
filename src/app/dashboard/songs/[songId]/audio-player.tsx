@@ -3,24 +3,49 @@
 import SongNFT from "@/../blockchain/artifacts/contracts/SongNFT.sol/SongNFT.json";
 import { TypographyH2 } from "@/components/typography/H2";
 import { Button } from "@/components/ui/button"; // Import custom Button component
-import { Card, CardContent } from "@/components/ui/card"; // Import custom Card components
+import { Card, CardContent, CardFooter } from "@/components/ui/card"; // Import custom Card components
 import { Progress } from "@/components/ui/progress"; // Import custom Progress component
 import { toast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
 import { parseEther } from "ethers/src.ts/utils";
-import { Eye, PauseIcon, PlayIcon, ThumbsDown, ThumbsUp } from "lucide-react"; // Import icons from lucide-react
+import { Eye, PauseIcon, PlayIcon, ThumbsDown, ThumbsUp } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"; // Import icons from lucide-react
 import Image from "next/image"; // Import Next.js Image component
 import { useEffect, useRef, useState } from "react"; // Import React hooks
-import { addSongListen, addSongRights } from "./actions";
+import { addSongFeedback, addSongListen, addSongRights } from "./actions";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FeedbackEnum } from "@prisma/client";
 
 export function AudioPlayer({ tokenId }: { tokenId: number }) {
-  const [canStream, setCanStream] = useState(false);
+  const [stakeholders, setStakeholders] = useState<
+    { address: string; percent: number }[]
+  >([]);
+  const [canStream, setCanStream] = useState<boolean | undefined>(undefined);
   const [isPlaying, setIsPlaying] = useState<boolean>(false); // State to manage the play/pause status
   const [progress, setProgress] = useState<number>(0); // State to manage the progress of the current track
   const [currentTime, setCurrentTime] = useState<number>(0); // State to manage the current time of the track
   const [duration, setDuration] = useState<number>(0); // State to manage the duration of the track
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [metadata, setMetadata] = useState<any | undefined>();
+  const [picture, setPicture] = useState("");
+  const [feedback, setFeedback] = useState<FeedbackEnum>();
+  const [views, setViews] = useState(0);
+  const [likes, setLikes] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref to manage the audio element
 
   useEffect(() => {
@@ -38,6 +63,13 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
 
       try {
         const owner = await songNFT.ownerOf(tokenId);
+        const stakeholders = await songNFT.getStakeholders(tokenId);
+        setStakeholders(
+          stakeholders.addresses.map((address: string, idx: number) => ({
+            address,
+            percent: Number(stakeholders.shares[idx]) / 100,
+          }))
+        );
         return owner.toLowerCase() === userAddress.toLowerCase();
       } catch {
         return false;
@@ -45,13 +77,38 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
     }
     hasMintedSong().then(async (v) => {
       if (!v) return;
-      const metaIpfsLink = await addSongListen(tokenId);
-      if (metaIpfsLink) {
+      const response = await addSongListen(tokenId);
+      if (response !== null) {
+        const {
+          metaIpfsLink,
+          streamLeft,
+          picture,
+          feedbackType,
+          likes,
+          views,
+        } = response;
+        setViews(views);
+        setLikes(likes);
         setCanStream(true);
+        setPicture(picture ?? "");
+        setFeedback(feedbackType);
         fetchTrackFromIPFS(metaIpfsLink);
+        toast({
+          title: "Consumed a stream",
+          description: `${streamLeft} streams left`,
+        });
       }
     });
   }, [tokenId]);
+
+  if (canStream === undefined) {
+    return (
+      <>
+        <TypographyH2>Audio player</TypographyH2>
+        <Skeleton className="w-full h-48" />
+      </>
+    );
+  }
 
   async function fetchTrackFromIPFS(ipfsFileLink: string) {
     const response = await fetch(`https://ipfs.io/ipfs/${ipfsFileLink}`);
@@ -121,9 +178,29 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
     return tx;
   }
 
-  const onLike = () => {};
+  const onLike = () => {
+    if (feedback === "Like") {
+      setLikes(likes - 1);
+      addSongFeedback(tokenId, "Neutral");
+      setFeedback("Neutral");
+      return;
+    }
+    setLikes(likes + 1);
+    addSongFeedback(tokenId, "Like");
+    setFeedback("Like");
+  };
 
-  const onDislike = () => {};
+  const onDislike = () => {
+    if (feedback === "Dislike") {
+      addSongFeedback(tokenId, "Neutral");
+      setFeedback("Neutral");
+      return;
+    } else if (feedback === "Like") {
+      setLikes(likes - 1);
+    }
+    addSongFeedback(tokenId, "Dislike");
+    setFeedback("Dislike");
+  };
 
   if (!canStream) {
     toast({ title: "You don't have rights to play this song." });
@@ -139,10 +216,9 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
             <CardContent className="flex justify-between items-center gap-6 py-8">
               <div className="relative w-20 h-20 rounded-full overflow-hidden shadow-2xl hover:scale-105 transition-transform duration-300">
                 <Image
-                  src="/default_avatar.jpg"
+                  src={picture}
                   alt="Album Cover"
                   layout="fill"
-                  objectFit="cover"
                   className="animate-pulse"
                 />
               </div>
@@ -155,7 +231,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
                 >
                   <div className="flex justify-between items-center gap-2 text-black dark:text-white">
                     <ThumbsUp className="w-8 h-8" />
-                    11K
+                    {likes}
                   </div>
                 </Button>
 
@@ -166,7 +242,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
                 >
                   <div className="flex justify-between items-center gap-2 text-black dark:text-white">
                     <Eye className="w-8 h-8" />
-                    11K
+                    {views}
                   </div>
                 </Button>
               </div>
@@ -197,7 +273,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
 
   return (
     <div className="flex flex-col text-black dark:text-white p-4">
-      <div className="max-w-md w-full space-y-4">
+      <div className="max-w-md w-full mx-auto space-y-4">
         <div className="pb-5">
           <TypographyH2>Audio Player</TypographyH2>
         </div>
@@ -205,7 +281,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
           <CardContent className="flex flex-col items-center justify-center gap-6 p-8">
             <div className="relative w-48 h-48 rounded-full overflow-hidden shadow-2xl hover:scale-105 transition-transform duration-300">
               <Image
-                src="/default_avatar.jpg"
+                src={picture}
                 alt="Album Cover"
                 layout="fill"
                 objectFit="cover"
@@ -233,7 +309,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
               >
                 <div className="flex justify-between items-center gap-2 text-black dark:text-white">
                   <Eye className="w-8 h-8" />
-                  11K
+                  {views}
                 </div>
               </Button>
 
@@ -260,7 +336,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
                     onClick={onLike}
                   >
                     <ThumbsUp className="w-8 h-8" />
-                    11K
+                    {likes}
                   </div>
                 </Button>
 
@@ -280,6 +356,37 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
               onLoadedMetadata={handleLoadedMetadata}
             ></audio>
           </CardContent>
+          <CardFooter>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="ml-auto">Show stakeholders</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Stakeholders list</DialogTitle>
+                  <DialogDescription>{metadata?.title}</DialogDescription>
+                </DialogHeader>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Address</TableHead>
+                      <TableHead>Percentage</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {stakeholders.map((stakeholder, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">
+                          {stakeholder.address}
+                        </TableCell>
+                        <TableCell>{stakeholder.percent}%</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </DialogContent>
+            </Dialog>
+          </CardFooter>
         </Card>
       </div>
     </div>

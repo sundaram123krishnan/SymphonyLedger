@@ -47,8 +47,6 @@ export async function POST(request: Request) {
     });
     await prisma.song.create({
       data: {
-        likes: 0,
-        dislikes: 0,
         metaIpfs: metadataCID,
         songIpfs: songFileCID,
         artistMetamaskAddress: artist.metamaskAddress,

@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { FeedbackEnum } from "@prisma/client";
 
 export async function addSongListen(tokenId: number) {
   const session = await auth.api.getSession({
@@ -13,7 +14,16 @@ export async function addSongListen(tokenId: number) {
 
   const song = await prisma.song.findFirstOrThrow({
     where: { tokenId },
-    include: { SongRights: { where: { userId: session.user.id } } },
+    include: {
+      SongRights: { where: { userId: session.user.id } },
+      artist: { include: { user: true } },
+      SongFeedback: { where: { userId: session.user.id } },
+    },
+  });
+
+  const songData = await prisma.song.findUniqueOrThrow({
+    where: { tokenId },
+    include: { _count: { select: { SongListen: true } }, SongFeedback: true },
   });
 
   if (song.SongRights[0].streamsLeft) {
@@ -29,7 +39,14 @@ export async function addSongListen(tokenId: number) {
         songTokenId: tokenId,
       },
     });
-    return song.metaIpfs;
+    return {
+      metaIpfsLink: song.metaIpfs,
+      streamLeft: song.SongRights[0].streamsLeft - 1,
+      picture: song.artist.user.image,
+      feedbackType: song.SongFeedback.at(0)?.type ?? "Neutral",
+      views: songData._count.SongListen,
+      likes: songData.SongFeedback.filter((f) => f.type === "Like").length,
+    };
   }
   return null;
 }
@@ -46,5 +63,18 @@ export async function addSongRights(tokenId: number, streams: number) {
       songTokenId: tokenId,
       streamsLeft: streams,
     },
+  });
+}
+
+export async function addSongFeedback(tokenId: number, feedback: FeedbackEnum) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) redirect("/sign-in");
+
+  await prisma.songFeedback.upsert({
+    create: { tokenId, type: feedback, userId: session.user.id },
+    update: { tokenId, type: feedback, userId: session.user.id },
+    where: { userId_tokenId: { userId: session.user.id, tokenId } },
   });
 }

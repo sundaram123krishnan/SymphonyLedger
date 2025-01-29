@@ -1,91 +1,32 @@
-"use client";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { useSession } from "@/lib/auth-client";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { FileUpload } from "@/components/ui/file-upload";
-import { Badge } from "@/components/ui/badge";
-import { Plus, PlayCircle, Share2 } from "lucide-react";
-import { useState, FormEvent } from "react";
+import { auth } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import { Plus } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
+import { SongRow } from "./SongRow";
 
-export default function Profile() {
-  const [title, setTitle] = useState("");
-  const { data: session } = useSession();
+export default async function Profile() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return <div>Not authenticated</div>;
+  }
 
   const user = {
     name: session?.user.name || "",
     avatarUrl: session?.user?.image || "",
-    songsCount: 24,
+    songsCount: await prisma.song.count({
+      where: { artist: { userId: session.user.id } },
+    }),
   };
 
-  const songs = [
-    {
-      id: 1,
-      title: "Midnight Serenade",
-      genre: "Jazz",
-      plays: 12500,
-      duration: "3:45",
-    },
-    {
-      id: 2,
-      title: "Electric Dreams",
-      genre: "Synthwave",
-      plays: 8700,
-      duration: "4:20",
-    },
-    {
-      id: 3,
-      title: "Acoustic Sunrise",
-      genre: "Folk",
-      plays: 5600,
-      duration: "3:10",
-    },
-    {
-      id: 4,
-      title: "Urban Rhythm",
-      genre: "Hip Hop",
-      plays: 15000,
-      duration: "3:55",
-    },
-    {
-      id: 5,
-      title: "Neon Lights",
-      genre: "Pop",
-      plays: 20100,
-      duration: "3:30",
-    },
-  ];
-
-  const [songFile, setSongFile] = useState<File | null>(null);
-  const [genre, setGenre] = useState("");
-  const [genres, setGenres] = useState<string[]>([]);
-
-  const handleSongFileUpload = (files: File[]) => {
-    if (files.length > 0) {
-      setSongFile(files[0]);
-    }
-  };
-
-  function addGenre(genre: string) {
-    setGenres([...genres, genre]);
-    setGenre("");
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-  }
+  const songs = await prisma.song.findMany({
+    where: { artist: { userId: session.user.id } },
+  });
 
   return (
     <div className="min-h-screen transition-colors duration-200 px-10 pt-3">
@@ -126,30 +67,7 @@ export default function Profile() {
           <div className="bg-white dark:bg-background shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
               {songs.map((song) => (
-                <li key={song.id}>
-                  <div className="px-4 py-4 sm:px-6 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <PlayCircle className="h-8 w-8 text-gray-400 dark:text-gray-500 mr-3" />
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                          {song.title}
-                        </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {song.genre} • {song.duration}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-500 dark:text-gray-400 mr-4">
-                        {song.plays.toLocaleString()} plays
-                      </span>
-                      <Button variant="ghost" size="icon">
-                        <Share2 className="h-5 w-5" />
-                        <span className="sr-only">Share</span>
-                      </Button>
-                    </div>
-                  </div>
-                </li>
+                <SongRow song={song} key={song.tokenId} />
               ))}
             </ul>
           </div>

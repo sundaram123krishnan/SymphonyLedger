@@ -15,7 +15,7 @@ datasource db {
 }
 
 model User {
-  id            String       @id
+  id            String         @id
   name          String
   email         String
   emailVerified Boolean
@@ -28,6 +28,7 @@ model User {
   Playlist      Playlist[]
   SongListen    SongListen[]
   SongRights    SongRights[]
+  SongFeedback  SongFeedback[]
 
   @@unique([email])
   @@map("user")
@@ -87,19 +88,34 @@ model Artist {
 }
 
 model Song {
-  artist                Artist       @relation(fields: [artistMetamaskAddress], references: [metamaskAddress])
+  artist                Artist         @relation(fields: [artistMetamaskAddress], references: [metamaskAddress])
   artistMetamaskAddress String
-  likes                 Int
-  dislikes              Int
   songIpfs              String
-  tokenId               Int          @id
+  tokenId               Int            @id
   metaIpfs              String
-  playlist              Playlist?    @relation(fields: [playlistPlaylistId], references: [playlistId])
+  playlist              Playlist?      @relation(fields: [playlistPlaylistId], references: [playlistId])
   playlistPlaylistId    Int?
-  Album                 Album?       @relation(fields: [albumAlbumId], references: [albumId])
+  Album                 Album?         @relation(fields: [albumAlbumId], references: [albumId])
   albumAlbumId          Int?
   SongListen            SongListen[]
   SongRights            SongRights[]
+  SongFeedback          SongFeedback[]
+}
+
+model SongFeedback {
+  song    Song         @relation(fields: [tokenId], references: [tokenId])
+  tokenId Int
+  user    User         @relation(fields: [userId], references: [id])
+  userId  String
+  type    FeedbackEnum
+
+  @@id([userId, tokenId])
+}
+
+enum FeedbackEnum {
+  Like
+  Dislike
+  Neutral
 }
 
 model Album {
