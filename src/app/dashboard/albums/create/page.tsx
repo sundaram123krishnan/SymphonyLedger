@@ -45,7 +45,7 @@ export default function AddAlbumCard() {
   return (
     <div>
       <TypographyH2>Create Album</TypographyH2>
-      <div className="flex justify-center items-center h-screen">
+      <div>
         <Card className="mt-4 w-[350px] shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardContent className="pt-6">
             <div className="space-y-4">
