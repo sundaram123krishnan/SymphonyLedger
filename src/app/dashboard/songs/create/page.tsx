@@ -171,10 +171,10 @@ export default function StakeholderPage() {
         </form>
         <Card className="col-span-1">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Stakeholder List</CardTitle>
+            <CardTitle className="text-black dark:text-white">Stakeholder List</CardTitle>
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="bg-primary">
+                <Button variant="outline" size="sm" className="bg-primary text-black dark:text-white">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Stakeholder
                 </Button>
@@ -219,7 +219,7 @@ export default function StakeholderPage() {
                   </div>
                 </div>
                 <DialogClose asChild>
-                  <Button onClick={addStakeholder}>Add Stakeholder</Button>
+                  <Button onClick={addStakeholder} className="text-black dark:text-white">Add Stakeholder</Button>
                 </DialogClose>
               </DialogContent>
             </Dialog>
@@ -227,7 +227,7 @@ export default function StakeholderPage() {
           <CardContent>
             <div className="rounded-md border">
               <Table>
-                <TableCaption>
+                <TableCaption className="py-12">
                   The artist owns{" "}
                   {100 -
                     stakeholders.reduce(

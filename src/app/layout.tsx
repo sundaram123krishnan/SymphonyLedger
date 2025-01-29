@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/toaster";
+import { usePathname } from "next/navigation";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,7 +21,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname()
   const { isPending, data: session } = useSession();
+
+  const testPathname = () => {
+    return /^\/dashboard(\/.*)?$/.test(pathname)
+  }
 
   if (isPending) {
     return (
@@ -72,7 +78,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <NextTopLoader color="#7f1d1d" zIndex={1000} />
-          <header className="border-b py-2 mx-auto max-w-5xl">
+          {!testPathname && <header className="border-b py-2 mx-auto max-w-5xl">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between h-16">
                 <div className="flex items-center">
@@ -96,9 +102,9 @@ export default function RootLayout({
                 </div>
               </div>
             </div>
-          </header>
+          </header>}
           {children}
-          <footer className="w-full bg-white dark:bg-black p-8 mt-16 border-t border-slate-200 mx-auto max-w-5xl">
+          {!testPathname && <footer className="w-full bg-white dark:bg-black p-8 mt-16 border-t border-slate-200 mx-auto max-w-5xl">
             <div className="flex flex-row flex-wrap items-center justify-center gap-y-6 gap-x-12 bg-white dark:bg-black text-center md:justify-between">
               <div className="flex gap-4">
                 <Music /> SymphonyLedger
@@ -108,7 +114,7 @@ export default function RootLayout({
                 Copyright © 2025&nbsp;
               </p>
             </div>
-          </footer>
+          </footer>}
           <Toaster />
         </ThemeProvider>
       </body>
