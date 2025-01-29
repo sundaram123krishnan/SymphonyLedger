@@ -1,5 +1,5 @@
 "use client";
-import SongNFT from "@/../../blockchain/artifacts/contracts/SongNFT.sol/SongNFT.json";
+import SongNFT from "@/../blockchain/artifacts/contracts/SongNFT.sol/SongNFT.json";
 import { ethers } from "ethers";
 import { useEffect } from "react";
 
@@ -13,7 +13,6 @@ export default function BlockchainTestPage() {
           SongNFT.abi,
           provider
         );
-        console.log(contract);
 
         const totalSupply = await contract.getNextTokenId();
         let songs = [];
