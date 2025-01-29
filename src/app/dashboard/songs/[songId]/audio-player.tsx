@@ -131,7 +131,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = () => {
           <CardContent className="flex flex-col items-center justify-center gap-6 p-8">
             <div className="relative w-48 h-48 rounded-full overflow-hidden shadow-2xl hover:scale-105 transition-transform duration-300">
               <Image
-                src="/music.svg"
+                src="/default_avatar.jpg"
                 alt="Album Cover"
                 layout="fill"
                 objectFit="cover"
