@@ -24,7 +24,7 @@ export function SongRow({ song }: { song: Song }) {
   }, [song.metadataUrl]);
 
   function copyLink() {
-    navigator.clipboard.writeText(`/dashboard/songs/${song.tokenId}`);
+    navigator.clipboard.writeText(`${process.env.BETTER_AUTH_URL}/dashboard/songs/${song.tokenId}`);
     toast({ title: "Copied link to clipboard" });
   }
 

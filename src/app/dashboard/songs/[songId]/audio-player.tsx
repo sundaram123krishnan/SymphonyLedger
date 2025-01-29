@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"; // Import custom Button compone
 import { Card, CardContent } from "@/components/ui/card"; // Import custom Card components
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress"; // Import custom Progress component
+import { toast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
 import {
   Eye,
@@ -139,28 +140,93 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
     }
   }, [currentTrackIndex, tracks, isPlaying]);
 
+  const onLike = () => {
+
+  }
+
+  const onDislike = () => {
+
+  }
+
   if (!canStream) {
-    
+    toast({ title: "You don't have rights to play this song." });
+
+    return (
+      <>
+        <div className="pb-5">
+          <TypographyH2>Audio Player</TypographyH2>
+        </div>
+
+        <div className="grid grid-cols-2 space-x-10">
+          <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardContent className="flex justify-between items-center gap-6 py-8">
+              <div className="relative w-20 h-20 rounded-full overflow-hidden shadow-2xl hover:scale-105 transition-transform duration-300">
+                <Image
+                  src="/default_avatar.jpg"
+                  alt="Album Cover"
+                  layout="fill"
+                  objectFit="cover"
+                  className="animate-pulse"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 flex-col">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleNextTrack}
+                  className="bg-white/20 rounded-full px-10"
+                >
+                  <div className="flex justify-between items-center gap-2 text-black dark:text-white">
+                    <ThumbsUp className="w-8 h-8" />
+                    11K
+                  </div>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleNextTrack}
+                  className="bg-white/20 rounded-full px-10"
+                >
+                  <div className="flex justify-between items-center gap-2 text-black dark:text-white">
+                    <Eye className="w-8 h-8" />
+                    11K
+                  </div>
+                </Button>
+              </div>
+
+              <div className="text-center">
+                <h2 className="text-xl font-bold mb-1 text-black dark:text-white">
+                  {tracks[currentTrackIndex]?.title || "Song Title"}
+                </h2>
+                <p className="text-white/70">
+                  {tracks[currentTrackIndex]?.artist || "Artist Name"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex flex-col gap-2 max-w-sm">
+            <Button variant="secondary">
+              Purchase 10 streams
+            </Button>
+
+            <Button>
+              Purchase 100 streams
+            </Button>
+          </div>
+        </div>
+      </>
+    )
   }
 
   // JSX return statement rendering the Audio Player UI
   return (
     <div className="flex flex-col text-black dark:text-white p-4">
       <div className="max-w-md w-full space-y-4">
-        <div className="flex items-center pb-5 justify-between">
+        <div className="pb-5">
           <TypographyH2>Audio Player</TypographyH2>
-
-          <Button>
-            <UploadIcon className="w-5 h-5 mr-2" />
-            <span>Upload</span>
-            <Input
-              type="file"
-              accept="audio/*"
-              multiple
-              className="hidden"
-              onChange={handleUpload}
-            />
-          </Button>
         </div>
         <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardContent className="flex flex-col items-center justify-center gap-6 p-8">
@@ -220,7 +286,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
                   onClick={handleNextTrack}
                   className="bg-white/20 rounded-full px-10"
                 >
-                  <div className="flex justify-between items-center gap-2 text-black dark:text-white">
+                  <div className="flex justify-between items-center gap-2 text-black dark:text-white" onClick={onLike}>
                     <ThumbsUp className="w-8 h-8" />
                     11K
                   </div>
@@ -229,7 +295,7 @@ export function AudioPlayer({ tokenId }: { tokenId: number }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={handleNextTrack}
+                  onClick={onDislike}
                   className="bg-white/20 rounded-full px-7"
                 >
                   <ThumbsDown className="w-8 h-8 text-black dark:text-white" />

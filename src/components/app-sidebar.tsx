@@ -1,27 +1,15 @@
 "use client";
 
-import * as React from "react";
 import {
   Album,
-  AudioWaveform,
   BarChart3,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
   Home,
-  Map,
   Mic,
-  Music,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-  Users,
+  Music
 } from "lucide-react";
+import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
 import {
@@ -31,9 +19,9 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { ModeToggle } from "./mode-toggle";
-import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
+import Link from "next/link";
+import { ModeToggle } from "./mode-toggle";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const {
@@ -58,11 +46,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Home",
         url: "/dashboard",
         icon: Home
-      },
-      {
-        title: "Stakeholders",
-        url: "/dashboard/add-stakeholder",
-        icon: Users
       },
       {
         title: "Albums",
