@@ -38,7 +38,7 @@ export default function RootLayout({
         >
           <SidebarProvider>
             <AppSidebar />
-            <main className="p-4 flex flex-col gap-4 w-full max-w-xl mx-auto">
+            <main className="p-4 flex flex-col gap-4 w-full mx-auto">
               {children}
             </main>
           </SidebarProvider>

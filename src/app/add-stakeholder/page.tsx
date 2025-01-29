@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -6,105 +10,127 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus } from "lucide-react";
 import { StakeholderChart } from "./chart";
 import { TypographyH2 } from "@/components/typography/H2";
-const items = [
-  {
-    id: "1",
-    name: "Alex Thompson",
-    username: "@alexthompson",
-    image:
-      "https://res.cloudinary.com/dlzlfasou/image/upload/v1736358071/avatar-40-02_upqrxi.jpg",
-    email: "alex.t@company.com",
-    location: "San Francisco, US",
-    status: "Active",
-    balance: "$1,250.00",
-  },
-  {
-    id: "2",
-    name: "Sarah Chen",
-    username: "@sarahchen",
-    image:
-      "https://res.cloudinary.com/dlzlfasou/image/upload/v1736358073/avatar-40-01_ij9v7j.jpg",
-    email: "sarah.c@company.com",
-    location: "Singapore",
-    status: "Active",
-    balance: "$600.00",
-  },
-  {
-    id: "4",
-    name: "Maria Garcia",
-    username: "@mariagarcia",
-    image:
-      "https://res.cloudinary.com/dlzlfasou/image/upload/v1736358072/avatar-40-03_dkeufx.jpg",
-    email: "m.garcia@company.com",
-    location: "Madrid, Spain",
-    status: "Active",
-    balance: "$0.00",
-  },
-  {
-    id: "5",
-    name: "David Kim",
-    username: "@davidkim",
-    image:
-      "https://res.cloudinary.com/dlzlfasou/image/upload/v1736358070/avatar-40-05_cmz0mg.jpg",
-    email: "d.kim@company.com",
-    location: "Seoul, KR",
-    status: "Active",
-    balance: "-$1,000.00",
-  },
-];
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-export default function StakeHolderPage() {
+export default function StakeholderPage() {
+  const [stakeholders, setStakeholders] = useState([]);
+  const [address, setAddress] = useState("");
+  const [percent, setPercent] = useState(0.0);
+
+  function addStakeholder() {
+    if (address && percent) {
+      const holder = { address, percent };
+      setStakeholders([...stakeholders, holder]);
+      setAddress("");
+      setPercent(0.0);
+    }
+  }
+
   return (
-    <div>
-      <TypographyH2>Stakeholder</TypographyH2>
+    <div className="container mx-auto px-4 py-8">
+      <TypographyH2 className="mb-6">Stakeholder Overview</TypographyH2>
 
-      <StakeholderChart />
-      <div className="bg-background">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Balance</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <img
-                      className="rounded-full"
-                      src={item.image}
-                      width={40}
-                      height={40}
-                      alt={item.name}
+      <div className="grid lg:grid-cols-2 gap-8">
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Stakeholder Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <StakeholderChart data={stakeholders} />
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Stakeholder List</CardTitle>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Stakeholder
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add Stakeholder</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="address" className="text-right">
+                      Address
+                    </Label>
+                    <Input
+                      id="address"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="col-span-3"
+                      placeholder="Enter address"
                     />
-                    <div>
-                      <div className="font-medium">{item.name}</div>
-                      <span className="mt-0.5 text-xs text-muted-foreground">
-                        {item.username}
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="percent" className="text-right">
+                      Percent
+                    </Label>
+                    <div className="col-span-3 relative">
+                      <Input
+                        id="percent"
+                        type="number"
+                        value={percent}
+                        onChange={(e) => setPercent(Number(e.target.value))}
+                        className="pr-8"
+                        placeholder="Enter percentage"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                        %
                       </span>
                     </div>
                   </div>
-                </TableCell>
-                <TableCell>{item.email}</TableCell>
-                <TableCell>{item.location}</TableCell>
-                <TableCell>{item.status}</TableCell>
-                <TableCell className="text-right">{item.balance}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <button className="my-4 mx-auto shadow-[0_0_0_3px_#000000_inset] px-6 py-2 bg-transparent border border-black dark:border-white dark:text-white text-black rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 flex items-center justify-center gap-2">
-          <Plus size={18} />
-          <span>Add Stakeholder</span>
-        </button>
+                </div>
+                <DialogClose asChild>
+                  <Button onClick={addStakeholder}>Add Stakeholder</Button>
+                </DialogClose>
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Address</TableHead>
+                    <TableHead>Percentage</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {stakeholders.map((stakeholder, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">
+                        {stakeholder.address}
+                      </TableCell>
+                      <TableCell>{stakeholder.percent}%</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
