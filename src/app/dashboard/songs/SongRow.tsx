@@ -1,7 +1,15 @@
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 import { PlayCircle, Share2 } from "lucide-react";
-import { Song } from "./SongsTable";
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Song } from "./SongsTable";
+
+function formatSongDuration(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
 
 export function SongRow({ song }: { song: Song }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,17 +23,25 @@ export function SongRow({ song }: { song: Song }) {
     getMetadata();
   }, [song.metadataUrl]);
 
+  function copyLink() {
+    navigator.clipboard.writeText(`/dashboard/songs/${song.tokenId}`);
+    toast({ title: "Copied link to clipboard" });
+  }
+
   return (
     <li>
       <div className="px-4 py-4 sm:px-6 flex items-center justify-between">
         <div className="flex items-center">
-          <PlayCircle className="h-8 w-8 text-gray-400 dark:text-gray-500 mr-3" />
+          <Link href={`/dashboard/songs/${song.tokenId}`}>
+            <PlayCircle className="h-8 w-8 text-gray-400 dark:text-gray-500 mr-3" />
+          </Link>
           <div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
               {song.title}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {metadata?.genre} • {metadata?.duration.toFixed(0)}
+              {metadata?.genre} •{" "}
+              {formatSongDuration(parseInt(metadata?.duration))}
             </p>
           </div>
         </div>
@@ -33,7 +49,7 @@ export function SongRow({ song }: { song: Song }) {
           <span className="text-sm text-gray-500 dark:text-gray-400 mr-4">
             {/* {song.plays.toLocaleString()} plays */}
           </span>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={copyLink}>
             <Share2 className="h-5 w-5" />
             <span className="sr-only">Share</span>
           </Button>

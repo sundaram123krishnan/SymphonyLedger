@@ -1,25 +1,22 @@
 "use client"; // Enables client-side rendering for this component
 
-import React, { useState, useRef, useEffect } from "react"; // Import React hooks
+import SongNFT from "@/../blockchain/artifacts/contracts/SongNFT.sol/SongNFT.json";
+import { TypographyH2 } from "@/components/typography/H2";
 import { Button } from "@/components/ui/button"; // Import custom Button component
 import { Card, CardContent } from "@/components/ui/card"; // Import custom Card components
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress"; // Import custom Progress component
+import { ethers } from "ethers";
 import {
-  ForwardIcon,
-  PlayIcon,
-  RewindIcon,
   Eye,
-  UploadIcon,
-  ThumbsUp,
-  ThumbsDown,
   PauseIcon,
+  PlayIcon,
+  ThumbsDown,
+  ThumbsUp,
+  UploadIcon,
 } from "lucide-react"; // Import icons from lucide-react
 import Image from "next/image"; // Import Next.js Image component
-import { Input } from "@/components/ui/input";
-import { TypographyH2 } from "@/components/typography/H2";
-
-// Define types for the component props and state
-interface AudioPlayerProps { }
+import React, { useEffect, useRef, useState } from "react"; // Import React hooks
 
 // Define the Track interface
 interface Track {
@@ -28,7 +25,8 @@ interface Track {
   src: string;
 }
 
-const AudioPlayer: React.FC<AudioPlayerProps> = () => {
+export function AudioPlayer({ tokenId }: { tokenId: number }) {
+  const [canStream, setCanStream] = useState(false);
   const [tracks, setTracks] = useState<Track[]>([]); // State to manage the list of tracks
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(0); // State to manage the current track index
   const [isPlaying, setIsPlaying] = useState<boolean>(false); // State to manage the play/pause status
@@ -36,6 +34,35 @@ const AudioPlayer: React.FC<AudioPlayerProps> = () => {
   const [currentTime, setCurrentTime] = useState<number>(0); // State to manage the current time of the track
   const [duration, setDuration] = useState<number>(0); // State to manage the duration of the track
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref to manage the audio element
+
+  useEffect(() => {
+    async function hasMintedSong() {
+      if (!window.ethereum) return;
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await window.ethereum.request!({ method: "eth_requestAccounts" });
+      const signer = provider.getSigner();
+      const userAddress = await signer.getAddress();
+      const songNFT = new ethers.Contract(
+        process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!,
+        SongNFT.abi,
+        signer
+      );
+
+      try {
+        const owner = await songNFT.ownerOf(tokenId);
+        return owner.toLowerCase() === userAddress.toLowerCase();
+      } catch {
+        return false;
+      }
+    }
+    hasMintedSong().then((v) => {
+      if (!v) return;
+      // TODO: check remaining streams on prisma and if yes, decrement and setCanStream(true);
+      if (true) {
+        setCanStream(true);
+      }
+    });
+  }, [tokenId]);
 
   // Function to handle file upload
   const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,6 +139,10 @@ const AudioPlayer: React.FC<AudioPlayerProps> = () => {
     }
   }, [currentTrackIndex, tracks, isPlaying]);
 
+  if (!canStream) {
+    
+  }
+
   // JSX return statement rendering the Audio Player UI
   return (
     <div className="flex flex-col text-black dark:text-white p-4">
@@ -164,7 +195,10 @@ const AudioPlayer: React.FC<AudioPlayerProps> = () => {
                 onClick={handleNextTrack}
                 className="bg-white/20 rounded-full px-10"
               >
-                <div className="flex justify-between items-center gap-2 text-black dark:text-white"><Eye className="w-8 h-8" />11K</div>
+                <div className="flex justify-between items-center gap-2 text-black dark:text-white">
+                  <Eye className="w-8 h-8" />
+                  11K
+                </div>
               </Button>
 
               <Button
@@ -186,7 +220,10 @@ const AudioPlayer: React.FC<AudioPlayerProps> = () => {
                   onClick={handleNextTrack}
                   className="bg-white/20 rounded-full px-10"
                 >
-                  <div className="flex justify-between items-center gap-2 text-black dark:text-white"><ThumbsUp className="w-8 h-8" />11K</div>
+                  <div className="flex justify-between items-center gap-2 text-black dark:text-white">
+                    <ThumbsUp className="w-8 h-8" />
+                    11K
+                  </div>
                 </Button>
 
                 <Button
@@ -210,6 +247,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = () => {
       </div>
     </div>
   );
-};
+}
 
 export default AudioPlayer;

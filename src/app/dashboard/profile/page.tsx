@@ -20,10 +20,8 @@ import { Plus, PlayCircle, Share2 } from "lucide-react";
 import { useState, FormEvent } from "react";
 
 export default function Profile() {
-  const [title, setTitle] = useState()
-  const {
-    data: session,
-  } = useSession()
+  const [title, setTitle] = useState("");
+  const { data: session } = useSession();
 
   const user = {
     name: session?.user.name || "",
@@ -61,7 +59,13 @@ export default function Profile() {
       plays: 15000,
       duration: "3:55",
     },
-    { id: 5, title: "Neon Lights", genre: "Pop", plays: 20100, duration: "3:30" },
+    {
+      id: 5,
+      title: "Neon Lights",
+      genre: "Pop",
+      plays: 20100,
+      duration: "3:30",
+    },
   ];
 
   const [songFile, setSongFile] = useState<File | null>(null);
@@ -81,7 +85,6 @@ export default function Profile() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-
   }
 
   return (
