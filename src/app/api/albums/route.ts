@@ -7,7 +7,7 @@ export async function GET() {
             include: {
                 artist: {
                     select: {
-                        user: { select: { name: true, image: true } }, // Get artist name & image
+                        user: { select: { name: true, image: true } },
                     },
                 },
             },
@@ -15,8 +15,8 @@ export async function GET() {
 
         const formattedAlbums = albums.map((album) => ({
             id: album.albumId,
-            name: album.artist.user.name, // Artist name
-            imageUrl: album.artist.user.image || "/placeholder.svg?height=300&width=300", // Artist image
+            name: album.name, // Artist name
+            imageUrl: album.image || "/placeholder.svg?height=300&width=300", // Artist image
         }));
 
         return NextResponse.json(formattedAlbums);

@@ -2,15 +2,6 @@
 import { useEffect, useState } from "react";
 import AlbumList from "./album-list"
 
-const sampleAlbums = [
-  { id: 1, name: "Thriller", artist: "Michael Jackson", imageUrl: "/placeholder.svg?height=300&width=300" },
-  { id: 2, name: "Back in Black", artist: "AC/DC", imageUrl: "/placeholder.svg?height=300&width=300" },
-  { id: 3, name: "The Dark Side of the Moon", artist: "Pink Floyd", imageUrl: "/placeholder.svg?height=300&width=300" },
-  { id: 4, name: "21", artist: "Adele", imageUrl: "/placeholder.svg?height=300&width=300" },
-  { id: 5, name: "1", artist: "The Beatles", imageUrl: "/placeholder.svg?height=300&width=300" },
-  { id: 6, name: "Born in the U.S.A.", artist: "Bruce Springsteen", imageUrl: "/placeholder.svg?height=300&width=300" },
-]
-
 export default function Album() {
   const [albums, setAlbums] = useState([]);
 
