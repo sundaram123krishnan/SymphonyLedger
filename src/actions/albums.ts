@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 
-const addAlbum = async (session: any, name: string, image: string, id) => {
+const addAlbum = async (session: any, name: string, image: string, id: number) => {
     try {
         if (!session?.user?.id) {
             throw new Error("User session is invalid or missing.");
@@ -22,7 +22,7 @@ const addAlbum = async (session: any, name: string, image: string, id) => {
         await prisma.album.create({
             data: {
                 name,
-                image,
+                image: image,
                 artistMetamaskAddress: artist.metamaskAddress,
             },
         });

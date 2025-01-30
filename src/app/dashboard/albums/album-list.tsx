@@ -36,17 +36,6 @@ export default function AlbumList({ albums, setAlbums }: { albums: Album[]; setA
     const [image, setImage] = useState("")
     const { data: session } = useSession();
 
-    const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImage(reader.result as string)
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const handleSubmit = async () => {
         const added_album = await addAlbum(session, name, image, albums[albums.length - 1].id + 1)
         console.log(added_album)

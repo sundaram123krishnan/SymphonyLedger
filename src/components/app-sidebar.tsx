@@ -4,6 +4,7 @@ import {
   Album,
   AudioLines,
   BarChart3,
+  ListMusic,
   Home,
   ListPlus,
   MapPin,
@@ -84,6 +85,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Plagiarism Check",
         url: "/dashboard/music-plagiarism",
         icon: AudioLines,
+      },
+      {
+        title: "SymphonyLedger Wrapped",
+        url: "/dashboard/wrapped",
+        icon: ListMusic,
       },
     ],
   };

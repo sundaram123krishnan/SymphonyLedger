@@ -148,12 +148,12 @@ export default function PlaylistTable() {
   };
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-10 px-10 pt-3">
       <TypographyH2>Playlists</TypographyH2>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Playlist Name</TableHead>
+            <TableHead>Name</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Creator</TableHead>
             <TableHead>Songs</TableHead>

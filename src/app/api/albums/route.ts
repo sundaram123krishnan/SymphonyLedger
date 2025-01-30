@@ -3,15 +3,7 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
     try {
-        const albums = await prisma.album.findMany({
-            include: {
-                artist: {
-                    select: {
-                        user: { select: { name: true, image: true } },
-                    },
-                },
-            },
-        });
+        const albums = await prisma.album.findMany();
 
         const formattedAlbums = albums.map((album) => ({
             id: album.albumId,

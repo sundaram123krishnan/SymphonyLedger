@@ -4,15 +4,17 @@ import prisma from "@/lib/prisma";
 export async function GET() {
     try {
         const albums = await prisma.album.findMany({
-            include: {
+            select: {
+                name: true,
+                image: true,
                 artist: {
                     select: {
-                        user: { select: { name: true, image: true } },
+                        user: { select: { name: true } },
                     },
                 },
                 songs: {
                     select: {
-                        likes: true,
+                        SongFeedback: { select: { type: true } },
                     },
                 },
             },
@@ -20,12 +22,14 @@ export async function GET() {
 
         const rankedAlbums = albums
             .map((album) => {
-                const totalLikes = album.songs.reduce((sum, song) => sum + song.likes, 0);
+                const totalLikes = album.songs?.flatMap(song =>
+                    song.SongFeedback.filter(fb => fb.type === "Like")
+                ).length ?? 0;
 
                 return {
                     name: album.name,
-                    artistName: album.artist.user.name,
-                    artistImage: album.artist.user.image,
+                    albumImage: album.image,
+                    artistName: album.artist?.user?.name ?? "Unknown",
                     totalLikes,
                 };
             })
