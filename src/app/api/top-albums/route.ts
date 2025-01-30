@@ -5,6 +5,7 @@ export async function GET() {
     try {
         const albums = await prisma.album.findMany({
             select: {
+                albumId: true,
                 name: true,
                 image: true,
                 artist: {
@@ -27,6 +28,7 @@ export async function GET() {
                 ).length ?? 0;
 
                 return {
+                    id: album.albumId,
                     name: album.name,
                     albumImage: album.image,
                     artistName: album.artist?.user?.name ?? "Unknown",

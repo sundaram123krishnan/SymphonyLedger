@@ -63,9 +63,7 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error uploading to Pinata:", error.stack);
-    }
+    console.error("Error uploading to Pinata:", error);
     return new Response("Failed to upload song to Pinata", { status: 500 });
   }
 }

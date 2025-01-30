@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 
-const addAlbum = async (session: any, name: string, image: string, id: number) => {
+const addAlbum = async (session: any, name: string, image: string) => {
     try {
         if (!session?.user?.id) {
             throw new Error("User session is invalid or missing.");
@@ -28,7 +28,6 @@ const addAlbum = async (session: any, name: string, image: string, id: number) =
         });
 
         return {
-            id,
             name,
             imageUrl: image,
         };

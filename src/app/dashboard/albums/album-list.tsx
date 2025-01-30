@@ -15,29 +15,46 @@ import {
 } from "@/components/ui/dialog"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label";
-import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
+import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
 import prisma from "@/lib/prisma";
 import { addAlbum } from "@/actions/albums";
 import { circIn } from "framer-motion";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import fetch_artist from "@/actions/artist";
 
 interface Album {
-    id: number
     name: string
     artist: string
     imageUrl: string
+    metaIpfs: string
 }
 
 interface AlbumListProps {
     albums: Album[]
 }
 
+const fetch_metadata = async (metaIpfs) => {
+    const response = await fetch(`https://ipfs.io/ipfs/${metaIpfs}`)
+    return await response.json()
+}
+
 export default function AlbumList({ albums, setAlbums }: { albums: Album[]; setAlbums: Dispatch<SetStateAction<never[]>> }) {
     const [name, setName] = useState("")
     const [image, setImage] = useState("")
+    const [active_album, set_active_album] = useState<Album>({
+        name: "",
+        artist: "",
+        imageUrl: "",
+        songs: [
+            { metaIpfs: "" }
+        ]
+    })
+
+    const [meta, set_meta] = useState({})
     const { data: session } = useSession();
 
     const handleSubmit = async () => {
-        const added_album = await addAlbum(session, name, image, albums[albums.length - 1].id + 1)
+        const added_album = await addAlbum(session, name, image)
         console.log(added_album)
 
         // Add the new album to the state
@@ -47,6 +64,25 @@ export default function AlbumList({ albums, setAlbums }: { albums: Album[]; setA
         setName("");
         setImage("");
     };
+
+    function convertToMinSec(seconds) {
+        const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const remainingSeconds = Math.floor(seconds % 60).toString().padStart(2, '0');
+        return `${minutes}:${remainingSeconds}`;
+    }
+
+    useEffect(() => {
+        if (active_album.songs.length > 0) {
+            const fetchAllMetadata = async () => {
+                const metadataArray = await Promise.all(
+                    active_album.songs.map(({ metaIpfs }) => fetch_metadata(metaIpfs))
+                );
+                set_meta(metadataArray);
+            };
+            fetchAllMetadata();
+        }
+    }, [active_album.name]);
+
 
     return (
         <Dialog>
@@ -110,26 +146,61 @@ export default function AlbumList({ albums, setAlbums }: { albums: Album[]; setA
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {albums.map((album, index) => (
-                        <div
-                            key={index}
-                            className="bg-white dark:bg-black rounded-lg shadow-md overflow-hidden transition-transform duration-300 ease-in-out hover:scale-105"
-                        >
-                            <div className="relative h-48 w-full">
-                                <Image
-                                    src={album.imageUrl || "/placeholder.svg"}
-                                    alt={`${album.name} cover`}
-                                    layout="fill"
-                                    unoptimized
-                                    objectFit="cover"
-                                    className="transition-opacity duration-300 ease-in-out hover:opacity-75"
-                                />
-                            </div>
-                            <div className="p-4">
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Album ID: {album.id}</p>
-                                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">{album.name}</h3>
-                            </div>
-                        </div>
+                    {albums.length > 0 && albums.map((album, index) => (
+                        <Dialog key={index}>
+                            <DialogTrigger onClick={() => set_active_album(album)}>
+                                <div
+                                    className="bg-white dark:bg-black rounded-lg shadow-md overflow-hidden transition-transform duration-300 ease-in-out hover:scale-105"
+                                >
+                                    <div className="relative h-48 w-full">
+                                        <Image
+                                            src={album.imageUrl || "/placeholder.svg"}
+                                            alt={`${album.name} cover`}
+                                            layout="fill"
+                                            unoptimized
+                                            objectFit="cover"
+                                            className="transition-opacity duration-300 ease-in-out hover:opacity-75"
+                                        />
+                                    </div>
+                                    <div className="p-4">
+                                        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                                            {album.name}
+                                        </h3>
+                                    </div>
+                                </div>
+                            </DialogTrigger>
+
+                            <DialogContent className="w-full">
+                                <DialogTitle>
+                                    Songs in {active_album.name} album
+                                </DialogTitle>
+
+                                {meta.length > 0 ? (
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Title</TableHead>
+                                                <TableHead>Genre</TableHead>
+                                                <TableHead>Artist</TableHead>
+                                                <TableHead>Duration</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {meta.map((playlist, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell className="font-medium">{playlist.title}</TableCell>
+                                                    <TableCell>{playlist.genre}</TableCell>
+                                                    <TableCell>{playlist.artists}</TableCell>
+                                                    <TableCell>{convertToMinSec(playlist.duration)}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                ) : (
+                                    <p className="text-gray-500">No songs available</p>
+                                )}
+                            </DialogContent>
+                        </Dialog>
                     ))}
                 </div>
             </div>
