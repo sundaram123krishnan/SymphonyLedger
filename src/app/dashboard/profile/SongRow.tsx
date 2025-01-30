@@ -13,7 +13,7 @@ function formatSongDuration(seconds: number) {
   return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 }
 
-export function SongRow({ song }: { song: Song }) {
+export function SongRow({ song, views }: { song: Song, views?: number }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [metadata, setMetadata] = useState<any | undefined>();
 
@@ -45,7 +45,8 @@ export function SongRow({ song }: { song: Song }) {
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {metadata?.genre} •{" "}
-              {formatSongDuration(parseInt(metadata?.duration))}
+              {formatSongDuration(parseInt(metadata?.duration))} •{" "}
+              {views && `${views} plays`}
             </p>
           </div>
         </div>

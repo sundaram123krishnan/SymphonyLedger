@@ -26,8 +26,6 @@ import {
 import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { ModeToggle } from "./mode-toggle";
-import { title } from "process";
-import { url } from "inspector";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession();
@@ -77,7 +75,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: BarChart3,
       },
       {
-        title: "HeatMaps",
+        title: "Heatmap",
         url: "/dashboard/heatmaps",
         icon: MapPin,
       },
