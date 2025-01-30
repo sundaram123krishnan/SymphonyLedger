@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TypographyH2 } from "@/components/typography/H2";
 import {
   Table,
@@ -10,8 +10,53 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ChevronsUpDown,
+  ChevronUp,
+  Command,
+} from "lucide-react";
+import { useSession } from "@/lib/auth-client";
+import { useContract } from "@/hooks/use-contract";
+import { ethers } from "ethers";
+import { Sonsie_One } from "next/font/google";
+import { CreatePlaylist } from "./actions";
+import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@radix-ui/react-popover";
+import {
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "cmdk";
+
+export type Song = {
+  title: string;
+  artist: string;
+  ipfsHash: string;
+  metadataUrl: string;
+  tokenId: number;
+  mintPrice: string;
+};
 
 const playlists = [
   {
@@ -138,7 +183,41 @@ const playlists = [
 
 export default function PlaylistTable() {
   const [expandedPlaylists, setExpandedPlaylists] = useState<number[]>([]);
+  const contract = useContract();
+  const [songs, setSongs] = useState<Song[]>([]);
 
+  useEffect(() => {
+    async function getAllSongs() {
+      if (!contract) return;
+
+      const totalSupply = await contract.getNextTokenId();
+
+      for (let tokenId = 0; tokenId < totalSupply; tokenId++) {
+        const exists = await contract.songExists(tokenId);
+        if (!exists) continue;
+
+        const [title, artist, ipfsHash, metadataURI, mintPrice] =
+          await contract.getSongMetadata(tokenId);
+
+        console.log(title, artist, mintPrice);
+
+        setSongs((prev) => [
+          ...prev,
+          {
+            tokenId,
+            title,
+            artist,
+            ipfsHash,
+            mintPrice: ethers.utils.formatEther(mintPrice),
+            metadataUrl: `https://ipfs.io/ipfs/${metadataURI}`,
+          },
+        ]);
+      }
+    }
+    getAllSongs();
+  }, [contract]);
+
+  console.log(songs);
   const togglePlaylist = (playlistId: number) => {
     setExpandedPlaylists((prev) =>
       prev.includes(playlistId)
@@ -146,6 +225,17 @@ export default function PlaylistTable() {
         : [...prev, playlistId]
     );
   };
+  const [open, setOpen] = useState(false);
+
+  const [playlistName, setPlaylistName] = useState("");
+  const [playlistDescription, setPlaylistDescription] = useState("");
+  const { data: session } = useSession();
+
+  async function createPlaylist() {
+    console.log(session);
+    const hashIds = songs.map((song) => song.ipfsHash);
+    CreatePlaylist(session, playlistName, playlistDescription, hashIds);
+  }
 
   return (
     <div className="container mx-auto py-10 px-10 pt-3">
@@ -212,6 +302,91 @@ export default function PlaylistTable() {
           ))}
         </TableBody>
       </Table>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button>Create playlist</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Playlist</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Playlist Name
+              </Label>
+              <Input
+                id="name"
+                className="col-span-3"
+                onChange={(e) => setPlaylistName(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="username" className="text-right">
+                Description
+              </Label>
+              <Input
+                id="username"
+                className="col-span-3"
+                onChange={(e) => setPlaylistDescription(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Songs</Label>
+              <div className="col-span-3">
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full justify-between"
+                    >
+                      Select songs...
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search songs..." />
+                      <CommandList>
+                        <CommandEmpty>No song found.</CommandEmpty>
+                        <CommandGroup>
+                          {songs.map((song) => (
+                            <CommandItem
+                              key={song.id}
+                              onSelect={() => toggleSong(song)}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedSongs.some((s) => s.id === song.id)
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {song.title} - {song.artist}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <DialogClose asChild>
+              <Button
+                onClick={() => {
+                  createPlaylist();
+                }}
+              >
+                Create Playlist
+              </Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

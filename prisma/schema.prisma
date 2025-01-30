@@ -128,12 +128,14 @@ model Album {
 }
 
 model Playlist {
-  creator     User   @relation(fields: [userId], references: [id])
-  songs       Song[]
+  creator     User     @relation(fields: [userId], references: [id])
+  songId      String[] @default([])
   userId      String
-  playlistId  Int    @id @default(autoincrement())
+  playlistId  Int      @id @default(autoincrement())
   name        String
   description String
+
+  Song Song[]
 }
 
 model SongRights {
