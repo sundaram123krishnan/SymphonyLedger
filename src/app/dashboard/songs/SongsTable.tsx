@@ -31,6 +31,8 @@ export function SongsTable() {
         const [title, artist, ipfsHash, metadataURI, mintPrice] =
           await contract.getSongMetadata(tokenId);
 
+        console.log(title, artist, mintPrice);
+
         setSongs((prev) => [
           ...prev,
           {
